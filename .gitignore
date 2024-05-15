@@ -1,0 +1,16 @@
+# data
+/data
+
+# model
+/model
+/models
+
+# wandb
+/wandb
+
+# cache
+/__pycache__
+
+# output
+/output
+/outputs
