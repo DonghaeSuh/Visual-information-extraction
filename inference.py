@@ -226,6 +226,10 @@ def main():  # noqa C901
                         "Maximum sequence length exceeded: No prediction for '%s'.",
                         line.split()[0],
                     )
+                    if args.mode == "op_test":
+                        output_line = [line.split()[0], "O", line.split()[-1]]
+                        csv_writer.writerow(output_line)
+                        logger.warning("Set 'O' for '%s'.", line.split()[0])
 
 
 if __name__ == "__main__":
