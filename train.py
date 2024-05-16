@@ -284,7 +284,7 @@ def train(  # noqa C901
                             tokenizer,
                             labels,
                             pad_token_label_id,
-                            mode="test",
+                            mode="dev",
                         )
                         for key, value in results.items():
                             wandb.log({'val_'+key: value})
