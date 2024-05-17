@@ -4,9 +4,9 @@
 
 <br/>
 
-[WHY f1-score?](##-WHY-f1-score?)\
-[Dev의 Validation f1-score와 Test의 Validation f1-score의 계산 방식](##-Dev의-Validation-f1-score와-Test의-Validation-f1-score의-계산-방식)\
-[높은 평가지표 점수를 얻으려면?](##-높은-평가지표-점수를-얻으려면?)
+[WHY f1-score?](##WHY-f1-score?)\
+[Dev의 Validation f1-score와 Test의 Validation f1-score의 계산 방식](##Dev의-Validation-f1-score와-Test의-Validation-f1-score의-계산-방식)\
+[높은 평가지표 점수를 얻으려면?](##높은-평가지표-점수를-얻으려면?)
 
 <br/>
 
