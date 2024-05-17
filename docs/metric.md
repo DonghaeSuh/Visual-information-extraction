@@ -1,6 +1,7 @@
 # Metric
 
 평가 지표(Metric)으로는 f1-score를 사용합니다
+
 <br/>
 
 ## WHY f1-score?
@@ -118,15 +119,15 @@ $$
     - predict : [ [sample1_predict1, tample1_predict2, … ], [sample2_predict1, sample2_predict2, .. ]
 - 각 샘플(file) 마다 4개의 라벨 [”company”, “date”, “address”, “total”] 에 해당하는 값을 key-value 형태로 저장합니다
 - value에 해당하는 단어들은 모두 “ “(공백)을 기준으로 이어붙입니다(join)
-    - predict : { filename : { ”company” : “~” , “date” : “~”, “address” : “~” , “total” : “~” }, …}
+    - predict : { filename : { ”company” : “word” , “date” : “word”, “address” : “word” , “total” : “word” }, …}
 
 <br/>
 
 - 이미 준비되어있는 정답 key-value값을 가져옵니다
-    - target : { filename : { ”company” : “~” , “date” : “~”, “address” : “~” , “total” : “~” }, …}
+    - target : { filename : { ”company” : “word” , “date” : “word”, “address” : “word” , “total” : “word” }, …}
 
 - 데이터가 준비되면, 파일마다 라벨 단위로 ‘정답(gold)’과 ‘예측(infer)’을 저장합니다
-    - total_data : { filename : {”company” : { “gold” : “~” , “infer” : “~” } , ”data” : { “gold” : “~” , “infer” : “~” }, ”address” : { “gold” : “~” , “infer” : “~” } , ”total” : { “gold” : “~” , “infer” : “~” }, … }
+    - total_data : { filename : {”company” : { “gold” : “word” , “infer” : “word” } , ”data” : { “gold” : “word” , “infer” : “word” }, ”address” : { “gold” : “word” , “infer” : “word” } , ”total” : { “gold” : “word” , “infer” : “word” }, … }
 
 <br/>
 
