@@ -4,12 +4,6 @@
 
 <br/>
 
-[WHY f1-score?](##WHY-f1-score?)\
-[Dev의 Validation f1-score와 Test의 Validation f1-score의 계산 방식](##Dev의-Validation-f1-score와-Test의-Validation-f1-score의-계산-방식)\
-[높은 평가지표 점수를 얻으려면?](##높은-평가지표-점수를-얻으려면?)
-
-<br/>
-
 ## WHY f1-score?
 
 - 많이 사용하는 Accuracy(정확도)를 평가지표로 선정할 경우 “O” 라벨이 너무 많이 존재하기 때문에
