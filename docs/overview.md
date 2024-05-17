@@ -3,7 +3,7 @@
 
 SROIE 데이터셋을 사용하며 **입력**으로 문서 이미지 대신 **단어와 그 단어에 해당하는 bounding box 좌표**가 주어졌을 때, 
 
-그 단어에 해당하는 **Entity [company, date, address, total]**를 맞추는 NER(Named Entity Recognition) Task입니다
+그 단어에 해당하는 **Entity [company, date, address, total]** 를 맞추는 NER(Named Entity Recognition) Task입니다
 
 <br/>
 
