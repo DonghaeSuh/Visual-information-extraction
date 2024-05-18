@@ -231,8 +231,8 @@ baseline의 Tokenizer가 어떻게 동작하는지, 주의해야할 점은 없�
 
 ### 학습시 유의해야 할 점
 - BERT와 LayoutLM의 tokenizer는 uncased 모델이 존재하고, 그 Tokenizer가 do_lower_case=True를 지원하지만,\
-RoBERTa의 경우 uncased 모델이 존재하지 않고 do_lower_case=True를 지원하지 않아 \
-학습시에 입력으로 대문자만 들어가지만 op_test시에 대소문자를 입력으로 받아 제대로된 성능을 내지 못할 가능성이 존재합니다
+**RoBERTa의 경우 uncased 모델이 존재하지 않고 do_lower_case=True를 지원하지 않아** \
+학습시에 입력으로 대문자만 들어가지만 op_test시에 대소문자를 입력으로 받아 **제대로된 성능을 내지 못할 가능성이 존재**합니다
 
 
 <br/>
