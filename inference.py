@@ -152,6 +152,13 @@ def main():  # noqa C901
         default=-1,
         help="For distributed training: local_rank",
     )
+    parser.add_argument(
+        "--average_mode",
+        default='macro',
+        type=str,
+        help="Average mode for seqeval library."
+    )
+
     args = parser.parse_args()
 
     if (

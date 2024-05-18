@@ -498,6 +498,12 @@ def main():  # noqa C901
         type=str,
         help="Description of the model for wandb logging."
     )
+    parser.add_argument(
+        "--average_mode",
+        default='macro',
+        type=str,
+        help="Average mode for seqeval library."
+    )
 
 
     args = parser.parse_args()
