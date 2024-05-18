@@ -14,25 +14,33 @@ baseline 모델의 성능을 평가합니다
 
 ## 최고 성능 모델 선정 기준 (평가 지표)
 
-학습 중간마다 특정 step(default : 50)이 학습되면, [평가지표 분석](./metric.md)에서 설명했던 방식대로\
+학습 중간마다 특정 step(default : 50)이 학습되면, [평가지표 분석](./metric.md)에서 설명했던 방식대로
+
 dev 데이터셋에 대한 현재 모델의 `micro avg f1-score`를 seqeval.metric.f1_score를 이용해 구했었습니다
 
 하지만, 아래에 기술할 문제가 발생했고 `macro avg f1-score`를 사용하는 것으로 변경했습니다
 
-최종 모델의 성능 평가지표 또한 op_test 데이터에 대한 f1-score이기 때문에 최고 성능 모델 선정 기준을 dev 데이터셋에 대한 최고 f1-score로 정했습니다
+최종 모델의 성능 평가지표 또한 op_test 데이터에 대한 f1-score이기 때문에 **최고 성능 모델 선정 기준**을 
+
+**dev 데이터셋에 대한 최고 macro average f1-score**로 정했습니다
 
 <br>
 
 **초반 학습 과정에서 문제가 발생해 early stopping을 적용하지 않았습니다 !**
 
 실제 학습을 돌려보니 
-너무 작은 step(150)으로 학습된 모델의 경우 validation f1-score(`0.9534`)가 더 높음에도 불구하고\
-validation f1-score(`0.9526`)가 조금 더 낮지만 더 많은 step(550)으로 학습된 모델보다 실제 op_test데이터셋에 대해 현저히 낮은 점수를 보였습니다 (step(150) : `0.7492` / step(550) : `0.8180`)
+
+너무 작은 step(150)으로 학습된 모델의 경우 validation f1-score(`0.9534`)가 더 높음에도 불구하고
+
+validation f1-score(`0.9526`)가 조금 더 낮지만 더 많은 step(550)으로 학습된 모델보다 
+
+실제 op_test데이터셋에 대해 현저히 낮은 점수를 보였습니다 (step(150) : `0.7492` / step(550) : `0.8180`)
 
 이 결과는 dev validation를 신뢰할수 없게 만들기 때문에 보다 적합한 평가지표를 찾기 위해 원인을 분석하였습니다
 
-<br/>
 
+<br/>
+<br/>
 
 그 이유를 앞선 [평가지표 분석](./metric.md)에서 확인했던 내용을 토대로 분석해보면 다음과 같습니다
 
@@ -68,10 +76,12 @@ validation f1-score(`0.9526`)가 조금 더 낮지만 더 많은 step(550)으로
 - 왼쪽 그래프는 각 라벨별 학습 step에 따른 f1-score를 뜻하고, 오른쪽 그래프는 학습 step에 따른 micro, macro average f1-score를 뜻합니다
 
 - 보이다 싶이 `ADDRESS`, `COMPANDY`, `DATE`는 **50 step** 만으로도 빠르게 성능을 내는 데 반면, `TOTAL`의 경우 최고 성능을 내는데 **400 step** 이상이 필요함을 볼 수 있습니다
-- 결국, 빠르게 최대 성능을 찍는 `ADDRESS`, `COMPANDY`, `DATE`는 support의 개수가 많아 f1-score의 큰 비중을 차지하여\
-적은 step 만으로 `최고 dev validation f1-score`을 기록하고 그 이후에 이들의 점수가 살짝 떨어지면\
-`TOTAL`에 대한 점수가 올랐다고 할 지라도 support가 큰 라벨들이 끼치는 점수 영향력에 미치지 못하여 \
-`최고 dev validation f1-score`를 이어서 찍지 못하는 것으로 이해할 수 있습니다
+ 
+- 결국, 빠르게 최고 성능을 찍는 `ADDRESS`, `COMPANDY`, `DATE`는 support의 개수가 많아 f1-score의 큰 비중을 차지하기 때문에 적은 step 만으로 `최고 dev validation f1-score`을 기록할 수 있게 됩니다
+- 하지만, support가 큰 라벨들의 점수가 살짝 떨어지면 그 영향력은 위 오른쪽 그래프에서 보이다 싶이 `TOTAL`의 성능 개선으로 인한 영향력보다 클 수 있습니다\
+- 즉, `TOTAL` 점수 상승으로 인한 micro avg f1-score의 점수 상승 크기보다\
+  support가 큰 라벨들의 소폭 점수 하락으로 인한 micro avg f1-score 점수 하락 크기가 더 크기 때문에\
+ `최고 dev validation f1-score`를 이어서 찍지 못하는 것으로 이해할 수 있습니다
 
 <br/>
 
@@ -80,7 +90,7 @@ validation f1-score(`0.9526`)가 조금 더 낮지만 더 많은 step(550)으로
 - 이 `macro avg f1-score`는 op_test 데이터를 가지고 계산하는 f1-score 방식과는 살짝 다르긴 하지만,\
 4개의 라벨을 각각 1:1:1:1 로 반영하여 계산한다는 점에서 비슷한 성격을 띠는 평가지표라고 할 수 있습니다
 - 최선의 방식은 완전히 동일한 방식으로 계산을 하는 것이지만 \
-이미 seqeval 라이브러리를 이용해 구현이 되어있는 부분이기에 인자만 바꾸어 쉽게 바꿔 사용하기로
+이미 seqeval 라이브러리를 이용해 구현이 되어있는 부분이기에 인자만 바꾸어 쉽게 바꿔 사용하기로 하였습니다
 
 
 
@@ -95,7 +105,7 @@ validation f1-score(`0.9526`)가 조금 더 낮지만 더 많은 step(550)으로
 
 train과 test가 비슷한 분포를 띄는 것을 보였고\
 데이터의 개수가 train(626)개로 그리 크지 않기 때문에 dev 데이터를 통한 검증의 신뢰도를 높이기 위해\
-train:dev 비율을 9:1이 아닌 8:2로 분리하여 dev의 비율을 높였습니다
+train:dev 비율을 9:1이 아닌 8:2로 분리하여 dev의 크기를 키웠습니다
 
 
 
@@ -106,12 +116,12 @@ train:dev 비율을 9:1이 아닌 8:2로 분리하여 dev의 비율을 높였습
 
 | Model | F1 | em | em_no_space | #Parameters | steps |
 | --- | --- | --- | --- | --- | --- |
-| `google-bert/bert-base-uncased` | 81.425 | 46.18 | 46.18 | 110M | 600 |
+| `google-bert/bert-base-uncased` | 81.42 | 46.18 | 46.18 | 110M | 600 |
 | `google-bert/bert-base-cased` | 76.56 | 36.69 | 36.69 | 109M | 750 |
 | `FacebookAI/roberta-base` | 75.86 | 43.15 | 43.15 | 125M | 600 |
-| `microsoft/layoutlm-base-uncased` | 82.77 | 50.36 | 50.36 | 113M | 600 |
+| `microsoft/layoutlm-base-uncased` | **82.77** | 50.36 | 50.36 | 113M | 600 |
 
-- baseline hyperparameters setting
+- Baseline hyperparameters setting
 
     ```
     batch_size : 8
@@ -120,7 +130,7 @@ train:dev 비율을 9:1이 아닌 8:2로 분리하여 dev의 비율을 높였습
     seed : 42
     val_evaluation_steps : 50
     ```
-- 학습 원리에 대해서는 [overview](./overview.md)에서 시각화시켜 간단히 정리해 놓았습니다
+- 학습 원리에 대해서는 [overview](./overview.md)에서 시각화와 함께 간단히 정리해 놓았습니다
 
 ### | Text Only
 - 학습에 Text만 사용하는 BERT와 RoBERTa부터 비교해보면, \
@@ -133,7 +143,7 @@ train:dev 비율을 9:1이 아닌 8:2로 분리하여 dev의 비율을 높였습
 <br/>
 
 ## 결과 기반 Basleine을 고도화 전략
--Roberta는 좋지않는 성능을 보이므로 제외하고 현재 Baseline을 고도화 하기위한 전략을 수립합니다
+Roberta는 좋지않는 성능을 보이므로 제외하고 현재 Baseline을 고도화 하기위한 전략을 수립합니다
 
 <br/>
 
