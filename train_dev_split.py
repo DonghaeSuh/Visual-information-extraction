@@ -129,14 +129,12 @@ def write_examples_to_file(examples, mode):
 def main():
     train_examples = read_examples_from_file(data_dir, "train")
 
-    random.Random(42)
-    random.shuffle(train_examples)
-    
-    # split train and validation 8:2
-    logger.info("Number of training examples: %d", len(train_examples))
+    random.seed(42)
     train_size = int(0.8 * len(train_examples))
-    train_set = train_examples[:train_size]
-    val_set = train_examples[train_size:]
+    train_set = random.sample(train_examples, train_size)
+
+    # # split train and validation 8:2
+    val_set = [item for item in train_examples if item not in train_set]
 
     logger.info("Number of training set: %d", len(train_set))
     logger.info("Number of validation set: %d", len(val_set))
