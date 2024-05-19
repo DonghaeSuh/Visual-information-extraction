@@ -176,19 +176,20 @@
 
 **전체 train, test 데이터에 대해 샘플별 Input 토큰 개수 확인**
 - tokenizer로는 Baseline 모델로 사용할 [BERT](https://arxiv.org/pdf/1810.04805v2)의 BertTokenizer를 사용합니다
-- 학습은 do_lower_case
+- do_lower_case=True
 - BertTokenizer는 WordPiece를 이용해 구성됩니다
 
 - train과 test 데이터에 대한 각 샘플별 Input의 길이 분포는 아래와 같습니다
 
-
-    ![alt text](img/max_length.png)
+    ![alt text](img/max_token_length.png)
 
     - 통계치는 아래와 같습니다\
-    (train set) : Max length: 68 | Mean length: 41.90 | Median length: 41.0\
-    (test set) : Max length: 61 | Mean length: 40.83 | Median length: 40.0
+    (train set) : Max length: 569 | Mean length: 251.82 | Median length: 240.0\
+    (test set) : Max length: 520 | Mean length: 249.17 | Median length: 235.0
     
-    - 최대 token 개수가 41개이므로 default로 설정되어있는 **최대 토큰 개수 (512)를 넘어가는 샘플은 없습니다**
+    - 최대 train과 test의 최대 Input 토큰 개수는 `569`, `520`이며\
+    default로 설정되어있는 최대 Input 토큰 개수인 `512`를 넘어가는 샘플의 개수는 train과 test에서 각각 `3개`, `1개` 입니다
+    - 해당 이상치에 대해서는 [analysis_train_dev_split.ipynb](../data_analysis/analysis_train_dev_split.ipynb)에서 확인하실 수 있습니다
 
 <br/>
 
@@ -219,6 +220,7 @@
         &nbsp; &nbsp; (Train set) : Max length: 6 | Mean length: 3.19 | Median length: 3.0\
         &nbsp; &nbsp; (Test set)  : Max length: 5 | Mean length: 3.23 | Median length: 3.0 
 
+- `company`, `address`가 상대적으로 길며, `date`와 `total`이 상대적으로 짧습니다
 
 <br/>
 <br/>
