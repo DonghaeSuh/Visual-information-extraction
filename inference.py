@@ -82,7 +82,7 @@ def main():  # noqa C901
         "--mode",
         default="test",
         type=str,
-        choices=["test", "op_test"],
+        choices=["test", "op_test", "dev"], # add dev mode for error analysis
         help="The type of inference. The `test` mode indicates the f1 score of the bbox unit of the referenced BIO tag, "
              "and the `op_test` mode indicates the entity f1 score of the final result."
     )
@@ -225,7 +225,7 @@ def main():  # noqa C901
                         example_id += 1
                 elif predictions[example_id]:
                     output_line = [line.split()[0], predictions[example_id].pop(0)] # [word, prediction]
-                    if args.mode == "op_test":
+                    if args.mode == "op_test" or args.mode == "dev":
                         output_line += [line.split()[-1]] # [word, prediction, file_id]
                     csv_writer.writerow(output_line)
                 else:
@@ -233,7 +233,7 @@ def main():  # noqa C901
                         "Maximum sequence length exceeded: No prediction for '%s'.",
                         line.split()[0],
                     )
-                    if args.mode == "op_test":
+                    if args.mode == "op_test" or args.mode == "dev":
                         output_line = [line.split()[0], "O", line.split()[-1]]
                         csv_writer.writerow(output_line)
                         logger.warning("Set 'O' for '%s'.", line.split()[0])

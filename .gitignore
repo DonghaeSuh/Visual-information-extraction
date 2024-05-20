@@ -2,6 +2,7 @@
 /data
 /data_analysis/*.csv
 /data_analysis/*.txt
+/dev_outputs
 
 # model
 /model
