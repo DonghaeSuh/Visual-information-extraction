@@ -33,11 +33,13 @@ from torch.utils.data.distributed import DistributedSampler
 from tqdm import tqdm, trange
 from transformers import (BERT_PRETRAINED_CONFIG_ARCHIVE_MAP,
                           LAYOUTLM_PRETRAINED_CONFIG_ARCHIVE_MAP,
-                          ROBERTA_PRETRAINED_CONFIG_ARCHIVE_MAP, AdamW,
+                          ROBERTA_PRETRAINED_CONFIG_ARCHIVE_MAP, 
+                          LAYOUTLMV2_PRETRAINED_CONFIG_ARCHIVE_MAP, AdamW,
                           BertConfig, BertForTokenClassification,
                           BertTokenizer, LayoutLMConfig,
                           LayoutLMForTokenClassification, RobertaConfig,
                           RobertaForTokenClassification, RobertaTokenizer,
+                          LayoutLMv2Config, LayoutLMv2ForTokenClassification, LayoutLMv2Tokenizer, LayoutLMv2ImageProcessor,
                           get_linear_schedule_with_warmup)
 from utils import SROIEDataset, evaluate
 
@@ -52,15 +54,17 @@ ALL_MODELS = sum(
             BERT_PRETRAINED_CONFIG_ARCHIVE_MAP,
             ROBERTA_PRETRAINED_CONFIG_ARCHIVE_MAP,
             LAYOUTLM_PRETRAINED_CONFIG_ARCHIVE_MAP,
+            LAYOUTLMV2_PRETRAINED_CONFIG_ARCHIVE_MAP,
         )
     ),
     (),
 )
 
 MODEL_CLASSES = {
-    "bert": (BertConfig, BertForTokenClassification, BertTokenizer),
-    "roberta": (RobertaConfig, RobertaForTokenClassification, RobertaTokenizer),
-    "layoutlm": (LayoutLMConfig, LayoutLMForTokenClassification, BertTokenizer),
+    "bert": (BertConfig, BertForTokenClassification, BertTokenizer, None),
+    "roberta": (RobertaConfig, RobertaForTokenClassification, RobertaTokenizer, None),
+    "layoutlm": (LayoutLMConfig, LayoutLMForTokenClassification, BertTokenizer, None),
+    "layoutlmv2": (LayoutLMv2Config, LayoutLMv2ForTokenClassification, LayoutLMv2Tokenizer, LayoutLMv2ImageProcessor),
 }
 
 # NOTE: DO NOT MODIFY THE FOLLOWING PATHS
@@ -95,7 +99,7 @@ def get_labels(path):
 
 
 def train(  # noqa C901
-    args, train_dataset, model, tokenizer, labels, pad_token_label_id
+    args, train_dataset, model, tokenizer, processor, labels, pad_token_label_id
 ):
     """ Train the model """
     args.train_batch_size = args.per_gpu_train_batch_size * max(1, args.n_gpu)
@@ -231,9 +235,12 @@ def train(  # noqa C901
             }
             if args.model_type in ["layoutlm"]:
                 inputs["bbox"] = batch[4].to(args.device)
+            if args.model_type in ["layoutlmv2"]:
+                inputs["bbox"] = batch[4].to(args.device)
+                inputs["image"] = batch[5].to(args.device)
             inputs["token_type_ids"] = (
                 batch[2].to(args.device)
-                if args.model_type in ["bert", "layoutlm"]
+                if args.model_type in ["bert", "layoutlm", "layoutlmv2"]
                 else None
             )  # RoBERTa don"t use segment_ids
 
@@ -282,6 +289,7 @@ def train(  # noqa C901
                             args,
                             model,
                             tokenizer,
+                            processor,
                             labels,
                             pad_token_label_id,
                             mode="dev",
@@ -305,6 +313,8 @@ def train(  # noqa C901
                     )  # Take care of distributed/parallel training
                     model_to_save.save_pretrained(model_dir)
                     tokenizer.save_pretrained(model_dir)
+                    if processor:
+                        processor.save_pretrained(model_dir)
                     torch.save(args, os.path.join(model_dir, "training_args.bin"))
                     logger.info("Saving model checkpoint to %s", model_dir)
 
@@ -498,13 +508,6 @@ def main():  # noqa C901
         type=str,
         help="Description of the model for wandb logging."
     )
-    parser.add_argument(
-        "--average_mode",
-        default='macro',
-        type=str,
-        help="Average mode for seqeval library."
-    )
-
 
     args = parser.parse_args()
 
@@ -577,7 +580,7 @@ def main():  # noqa C901
         torch.distributed.barrier()  # Make sure only the first process in distributed training will download model & vocab
 
     args.model_type = args.model_type.lower()
-    config_class, model_class, tokenizer_class = MODEL_CLASSES[args.model_type]
+    config_class, model_class, tokenizer_class, processor = MODEL_CLASSES[args.model_type]
     config = config_class.from_pretrained(
         args.config_name if args.config_name else args.model_name_or_path,
         num_labels=num_labels,
@@ -595,6 +598,13 @@ def main():  # noqa C901
         cache_dir=args.cache_dir if args.cache_dir else None,
     )
 
+    if processor:
+        processor = LayoutLMv2ImageProcessor.from_pretrained(
+            args.model_name_or_path,
+            cache_dir=args.cache_dir if args.cache_dir else None,
+            apply_ocr = False, # In Token Classification with word label, OCR is not needed
+        )
+
     if args.local_rank == 0:
         torch.distributed.barrier()  # Make sure only the first process in distributed training will download model & vocab
 
@@ -605,10 +615,10 @@ def main():  # noqa C901
     # Training
     if args.do_train:
         train_dataset = SROIEDataset(
-            args, tokenizer, labels, pad_token_label_id, mode="train"
+            args, tokenizer, processor, labels, pad_token_label_id, mode="train"
         )
         global_step, tr_loss = train(
-            args, train_dataset, model, tokenizer, labels, pad_token_label_id
+            args, train_dataset, model, tokenizer, processor, labels, pad_token_label_id
         )
         logger.info(" global_step = %s, average loss = %s", global_step, tr_loss)
 

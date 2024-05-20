@@ -7,12 +7,14 @@ from seqeval.metrics import (classification_report, f1_score, precision_score,
                              recall_score)
 from torch.utils.data import DataLoader, Dataset, SequentialSampler
 from tqdm import tqdm
+from PIL import Image
+from transformers import LayoutLMv2ImageProcessor
 
 logger = logging.getLogger(__name__)
 
 
 class SROIEDataset(Dataset):
-    def __init__(self, args, tokenizer, labels, pad_token_label_id, mode):
+    def __init__(self, args, tokenizer, processor, labels, pad_token_label_id, mode):
         if args.local_rank not in [-1, 0] and mode == "train":
             torch.distributed.barrier()  # Make sure only the first process in distributed training process the dataset, and the others will use the cache
 
@@ -36,6 +38,7 @@ class SROIEDataset(Dataset):
                 labels,
                 args.max_seq_length,
                 tokenizer,
+                processor,
                 cls_token_at_end=bool(args.model_type in ["xlnet"]),
                 # xlnet has a cls token at the end
                 cls_token=tokenizer.cls_token,
@@ -72,6 +75,10 @@ class SROIEDataset(Dataset):
         )
         self.all_bboxes = torch.tensor([f.boxes for f in features], dtype=torch.long) # (bs, max_seq_length, 4)
 
+        self.all_images = torch.tensor(
+            [f.image for f in features], dtype=torch.long # (bs, 3, 244, 244)
+        )
+
     def __len__(self):
         return len(self.features)
 
@@ -82,13 +89,14 @@ class SROIEDataset(Dataset):
             self.all_segment_ids[index],
             self.all_label_ids[index],
             self.all_bboxes[index],
+            self.all_images[index],
         )
 
 
 class InputExample(object):
     """A single training/test example for token classification."""
 
-    def __init__(self, guid, words, labels, boxes, actual_bboxes, file_name, page_size):
+    def __init__(self, guid, words, labels, boxes, actual_bboxes, image, file_name, page_size):
         """Constructs a InputExample.
 
         Args:
@@ -106,6 +114,7 @@ class InputExample(object):
         self.labels = labels
         self.boxes = boxes
         self.actual_bboxes = actual_bboxes
+        self.image = image
         self.file_name = file_name
         self.page_size = page_size
 
@@ -121,6 +130,7 @@ class InputFeatures(object):
         label_ids,
         boxes,
         actual_bboxes,
+        image,
         file_name,
         page_size,
     ):
@@ -135,6 +145,7 @@ class InputFeatures(object):
         self.label_ids = label_ids
         self.boxes = boxes
         self.actual_bboxes = actual_bboxes
+        self.image = image
         self.file_name = file_name
         self.page_size = page_size
 
@@ -143,6 +154,7 @@ def read_examples_from_file(data_dir, mode):
     file_path = os.path.join(data_dir, "{}.txt".format(mode))
     box_file_path = os.path.join(data_dir, "{}_box.txt".format(mode))
     image_file_path = os.path.join(data_dir, "{}_image.txt".format(mode))
+    jpg_file_path = os.path.join(data_dir, "{}/img".format(mode)) if mode != "op_test" else os.path.join(data_dir, "test/img")
     guid_index = 1
     examples = []
     with open(file_path, encoding="utf-8") as f, open(
@@ -151,6 +163,7 @@ def read_examples_from_file(data_dir, mode):
         words = []
         boxes = []
         actual_bboxes = []
+        image = 0
         file_name = None
         page_size = None
         labels = []
@@ -164,6 +177,7 @@ def read_examples_from_file(data_dir, mode):
                             labels=labels,
                             boxes=boxes,
                             actual_bboxes=actual_bboxes,
+                            image=Image.open(os.path.join(jpg_file_path, f"{file_name}.jpg")).convert("RGB"),
                             file_name=file_name,
                             page_size=page_size,
                         )
@@ -172,6 +186,7 @@ def read_examples_from_file(data_dir, mode):
                     words = []
                     boxes = []
                     actual_bboxes = []
+                    image = 0
                     file_name = None
                     page_size = None
                     labels = []
@@ -204,6 +219,7 @@ def read_examples_from_file(data_dir, mode):
                     labels=labels,
                     boxes=boxes,
                     actual_bboxes=actual_bboxes,
+                    image=Image.open(os.path.join(jpg_file_path, f"{file_name}.jpg")).convert("RGB"),
                     file_name=file_name,
                     page_size=page_size,
                 )
@@ -216,6 +232,7 @@ def convert_examples_to_features(
     label_list,
     max_seq_length,
     tokenizer,
+    processor=None,
     cls_token_at_end=False,
     cls_token="[CLS]",
     cls_token_segment_id=1,
@@ -351,6 +368,13 @@ def convert_examples_to_features(
         assert len(label_ids) == max_seq_length
         assert len(token_boxes) == max_seq_length
 
+        # image preprocessing if model is LayoutLMV2
+        if processor:
+            image = processor.preprocess(example.image) # (defaults) do_resize = True, size = (244, 244)
+            image = image.pixel_values[0] # (1, 3, 244, 244) -> (3, 244, 244)
+        else:
+            image = 0
+
         if ex_index < 5:
             logger.info("*** Example ***")
             logger.info("guid: %s", example.guid)
@@ -370,6 +394,7 @@ def convert_examples_to_features(
                 label_ids=label_ids,
                 boxes=token_boxes,
                 actual_bboxes=actual_bboxes,
+                image= image,
                 file_name=file_name,
                 page_size=page_size,
             )
@@ -377,8 +402,8 @@ def convert_examples_to_features(
     return features
 
 
-def evaluate(args, model, tokenizer, labels, pad_token_label_id, mode, prefix=""):
-    eval_dataset = SROIEDataset(args, tokenizer, labels, pad_token_label_id, mode=mode)
+def evaluate(args, model, tokenizer, processor, labels, pad_token_label_id, mode, prefix=""):
+    eval_dataset = SROIEDataset(args, tokenizer, processor, labels, pad_token_label_id, mode=mode)
 
     args.eval_batch_size = args.per_gpu_eval_batch_size * max(1, args.n_gpu)
     eval_sampler = SequentialSampler(eval_dataset)
@@ -407,6 +432,9 @@ def evaluate(args, model, tokenizer, labels, pad_token_label_id, mode, prefix=""
             }
             if args.model_type in ["layoutlm"]:
                 inputs["bbox"] = batch[4].to(args.device)
+            if args.model_type in ["layoutlmv2"]:
+                inputs["bbox"] = batch[4].to(args.device)
+                inputs["image"] = batch[5].to(args.device)
             inputs["token_type_ids"] = (
                 batch[2].to(args.device)
                 if args.model_type in ["bert", "layoutlm"]
@@ -449,7 +477,8 @@ def evaluate(args, model, tokenizer, labels, pad_token_label_id, mode, prefix=""
         "loss": eval_loss,
         "precision": precision_score(out_label_list, preds_list),
         "recall": recall_score(out_label_list, preds_list),
-        f"{args.average_mode}_f1": f1_score(out_label_list, preds_list, average=args.average_mode),
+        "micro_f1": f1_score(out_label_list, preds_list, average='micro'),
+        "macro_f1": f1_score(out_label_list, preds_list, average="macro"),
     }
 
     report = classification_report(out_label_list, preds_list)
