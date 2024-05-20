@@ -8,11 +8,14 @@ import torch
 from torch.nn import CrossEntropyLoss
 from transformers import (BERT_PRETRAINED_CONFIG_ARCHIVE_MAP,
                           LAYOUTLM_PRETRAINED_CONFIG_ARCHIVE_MAP,
-                          ROBERTA_PRETRAINED_CONFIG_ARCHIVE_MAP, BertConfig,
+                          ROBERTA_PRETRAINED_CONFIG_ARCHIVE_MAP, 
+                          LAYOUTLMV2_PRETRAINED_CONFIG_ARCHIVE_MAP,
+                          BertConfig,
                           BertForTokenClassification, BertTokenizer,
                           LayoutLMConfig, LayoutLMForTokenClassification,
                           RobertaConfig, RobertaForTokenClassification,
-                          RobertaTokenizer)
+                          RobertaTokenizer,
+                          LayoutLMv2Config, LayoutLMv2ForTokenClassification, LayoutLMv2Tokenizer, LayoutLMv2ImageProcessor)
 from utils import evaluate
 
 logger = logging.getLogger(__name__)
@@ -24,15 +27,17 @@ ALL_MODELS = sum(
             BERT_PRETRAINED_CONFIG_ARCHIVE_MAP,
             ROBERTA_PRETRAINED_CONFIG_ARCHIVE_MAP,
             LAYOUTLM_PRETRAINED_CONFIG_ARCHIVE_MAP,
+            LAYOUTLMV2_PRETRAINED_CONFIG_ARCHIVE_MAP,
         )
     ),
     (),
 )
 
 MODEL_CLASSES = {
-    "bert": (BertConfig, BertForTokenClassification, BertTokenizer),
-    "roberta": (RobertaConfig, RobertaForTokenClassification, RobertaTokenizer),
-    "layoutlm": (LayoutLMConfig, LayoutLMForTokenClassification, BertTokenizer),
+    "bert": (BertConfig, BertForTokenClassification, BertTokenizer, None),
+    "roberta": (RobertaConfig, RobertaForTokenClassification, RobertaTokenizer, None),
+    "layoutlm": (LayoutLMConfig, LayoutLMForTokenClassification, BertTokenizer, None),
+    "layoutlmv2": (LayoutLMv2Config, LayoutLMv2ForTokenClassification, LayoutLMv2Tokenizer, LayoutLMv2ImageProcessor),
 }
 
 # NOTE: DO NOT MODIFY THE FOLLOWING PATHS
@@ -196,7 +201,7 @@ def main():  # noqa C901
     pad_token_label_id = CrossEntropyLoss().ignore_index
 
     args.model_type = args.model_type.lower()
-    config_class, model_class, tokenizer_class = MODEL_CLASSES[args.model_type]
+    config_class, model_class, tokenizer_class, processor = MODEL_CLASSES[args.model_type]
 
     # Predict!
     tokenizer = tokenizer_class.from_pretrained(
@@ -204,8 +209,16 @@ def main():  # noqa C901
     )
     model = model_class.from_pretrained(args.model_name_or_path)
     model.to(args.device)
+
+    if processor:
+        processor = LayoutLMv2ImageProcessor.from_pretrained(
+            args.model_name_or_path,
+            cache_dir=args.cache_dir if args.cache_dir else None,
+            apply_ocr = False, # In Token Classification with word label, OCR is not needed
+        )
+    
     result, predictions = evaluate(
-        args, model, tokenizer, labels, pad_token_label_id, mode=args.mode
+        args, model, tokenizer, processor, labels, pad_token_label_id, mode=args.mode
     )
     # Save results
     output_test_results_file = os.path.join(args.output_dir, f"{args.mode}_results.txt")
