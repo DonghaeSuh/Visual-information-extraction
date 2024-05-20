@@ -1,6 +1,7 @@
 import os
 import random
 import logging
+import shutil
 
 logger = logging.getLogger(__name__)
 
@@ -133,7 +134,7 @@ def main():
     train_size = int(0.8 * len(train_examples))
     train_set = random.sample(train_examples, train_size)
 
-    # # split train and validation 8:2
+    # split train and validation 8:2
     val_set = [item for item in train_examples if item not in train_set]
 
     logger.info("Number of training set: %d", len(train_set))
@@ -150,6 +151,15 @@ def main():
     os.rename(os.path.join(data_dir, "new_train.txt"), os.path.join(data_dir, "train.txt"))
     os.rename(os.path.join(data_dir, "new_train_box.txt"), os.path.join(data_dir, "train_box.txt"))
     os.rename(os.path.join(data_dir, "new_train_image.txt"), os.path.join(data_dir, "train_image.txt"))
+
+
+    # split image files
+    # ../input/data에 존재하는 train/img 폴더에 있는 이미지 파일들 중에서, dev_df의 file_name에 해당하는 이미지 파일들을 dev/img 폴더로 이동
+    if not os.path.exists(f"../input/data/dev/img"):
+            os.makedirs(f"../input/data/dev/img/")
+
+    for example in val_set:
+        shutil.move(f"../input/data/train/img/{example.file_name}.jpg", f"../input/data/dev/img/{example.file_name}.jpg")
 
     logger.info("Successfully split the training set into training and validation sets.")
     logger.info("The original training set is renamed to old_train.txt, old_train_box.txt, and old_train_image.txt.")
