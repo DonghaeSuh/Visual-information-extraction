@@ -120,6 +120,7 @@ Document Understanding](https://arxiv.org/abs/2012.14740)
 - **구조** : Transformer Encoders
 
 - **Model Architecture**
+
 ![alt text](img/layoutlmv3_arc.png)
 - **사전학습**
     - 방식 
@@ -130,7 +131,7 @@ Document Understanding](https://arxiv.org/abs/2012.14740)
                  - 일부 Tokne을 무작위로 Masking하고 이를 복원하는 사전학습을 수행합니다
 
             - **Masked Image Modeling (MIM)**
-                - [ViT]((https://arxiv.org/abs/2010.11929))처럼 이미지를 Patch단위로 쪼개 Token으로 만들고, 일부 Patch Token을 Masking하고 이를 복원하는 사전학습을 수행합니다
+                - [ViT](https://arxiv.org/abs/2010.11929)처럼 이미지를 Patch단위로 쪼개 Token으로 만들고, 일부 Patch Token을 Masking하고 이를 복원하는 사전학습을 수행합니다
 
             - **Word-Patch Alignment (WPA)**
                 - 모델의 입력에서 특정 Text는 특정 Image patch와 대응되게 됩니다
@@ -184,7 +185,7 @@ Document Understanding](https://arxiv.org/abs/2012.14740)
     - **최종 Text Embedding**
 
         - LayoutLM에서는 각 Token에 대해 Text Embedding과 Bounding box Embedding을 그냥 더했지만, \
-        LayoutLMV2에서는 Text Embedding의 차원을 768이라고 했을 때,\
+        LayoutLMV2와 LayoutLMV3에서는 Text Embedding의 차원을 768이라고 했을 때,\
          6개의 Bounding Box Postion Embedding의 각 차원은 128차원으로 만들고 이 6개를 concat하여 768(128*6) 차원으로 만든 후, \
          Text Embedding과 더합니다
             - 이때, (x0, x1, width)끼리 (y0, y1, hight)끼리 같은 임베딩 layer를 사용합니다
@@ -337,3 +338,4 @@ laytoutlmv3가 더 좋은 성능을 보이는 것을 확인할 수 있습니다
 - [LayoutLMv3: Pre-training for Document AI with Unified Text and Image Masking](https://arxiv.org/abs/2204.08387)
 - [StructuralLM: Structural Pre-training for Form Understanding](https://arxiv.org/abs/2105.11210)
 - [Neural Machine Translation of Rare Words with Subword Units](https://arxiv.org/abs/1508.07909)
+- [An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale](https://arxiv.org/abs/2010.11929)
