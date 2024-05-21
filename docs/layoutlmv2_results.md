@@ -32,7 +32,13 @@ LayoutLMV2를 정리하고 결과를 분석합니다
 ## Quick Review of LayoutLM
 
 ### | Overview
+> 한 줄 요약 : 이미지에서 추출된 텍스트가 주어질 경우, 텍스트만 사용하지 말고 이미지도 사용하자!
 - **구조** : Transformer Encoders
+
+- **Model Architecture**
+
+![alt text](./img/layoutlm_arc.png)
+
 - **사전학습**
     - 방식 
         - **Masked Visual-Language Model(MVLM)**
@@ -50,10 +56,7 @@ LayoutLMV2를 정리하고 결과를 분석합니다
 
 - **Tokenizer** : [WordPiece](https://arxiv.org/abs/1609.08144)
 - **선정 모델** : [`microsoft/layoutlm-base-uncased`](https://huggingface.co/microsoft/layoutlm-base-uncased), [`microsoft/layoutlm-large-uncased`](https://huggingface.co/microsoft/layoutlm-large-uncased)
-- **소개 논문** : [LayoutLM: Pre-training of Text and Layout for Document Image Understanding](https://arxiv.org/pdf/1912.13318)
-- **Model Architecture**
-
-![alt text](./img/layoutlm_arc.png)
+- **소개 논문** : [LayoutLM: Pre-training of Text and Layout for Document Image Understanding](https://arxiv.org/abs/1912.13318)
 
 <br/>
 
@@ -99,7 +102,14 @@ LayoutLMV2를 정리하고 결과를 분석합니다
 
 
 ### | Overview
+> 한 줄 요약 : LayoutLM처럼 이미지를 활용하는데, 이를 사전학습에 참여시켜 이미지-텍스트간 Alignment를 높이자!
 - **구조** : Transformer Encoders
+
+- **Model Architecture**
+
+![alt text](img/layoutlmv2-arc.png)
+
+
 - **사전학습**
     - 방식 
         - **Masked Visual-Language Model(MVLM)**
@@ -132,10 +142,7 @@ LayoutLMV2를 정리하고 결과를 분석합니다
 - **Tokenizer** : [WordPiece](https://arxiv.org/abs/1609.08144)
 - **선정 모델** : [`microsoft/layoutlmv2-base-uncased`](https://huggingface.co/microsoft/layoutlmv2-base-uncased), [`microsoft/layoutlmv2-large-uncased`](https://huggingface.co/microsoft/layoutlmv2-large-uncased)
 - **소개 논문** : [LayoutLMv2: Multi-modal Pre-training for Visually-rich
-Document Understanding](https://arxiv.org/pdf/2012.14740)
-- **Model Architecture**
-
-![alt text](img/layoutlmv2-arc.png)
+Document Understanding](https://arxiv.org/abs/2012.14740)
 
 <br/>
 
@@ -157,20 +164,20 @@ Document Understanding](https://arxiv.org/pdf/2012.14740)
 
 ### | Fine-tuning Method
 - 3가지 타입의 임베딩이 사용됩니다
-    - Text Embedding(Text Embedding + Positional Embedding + Segment Embedding)
+    - **Text Embedding**(Text Embedding + Positional Embedding + Segment Embedding)
 
-    - Bounding box Position Embedding(x0,y0,x1,y1,width,height)\
+    - **Bounding box Position Embedding**(x0,y0,x1,y1,width,height)
         - (x0,y0)는 Text Bounding box의 왼쪽 상단 좌표, (x1,y1)는 Text Bounding box의 오른쪽 하단 좌표입니다
         - width, height는 Text Bounding box의 width, height입니다
 
-    - Image Embedding
-        - Document page image를 ( 224 x 244 ) 크기로 normalize합니다
+    - **Image Embedding**
+        - Document page image를 ( 3 x 224 x 244 ) 크기로 normalize합니다 (3은 BGR channel입니다)
         - CNN-based Visual Encoder(ResNeXt-FPN)의 output feature map을 Average Pooling하여 ( 7 x 7 ) 크기의 고정된 output으로 반환합니다
         - ( 7 x 7 ) feature를 Flatten시켜 `49개`의 Visual Embedding Sequence를 만듭니다
         - 여기에 Positional Embedding(각 Token의 순서정보), Segment Embedding(이미지와 텍스트의 분리 정보)을 더합니다
         - 자세한 코드 내용은 다음 [링크](https://github.com/huggingface/transformers/blob/v4.41.0/src/transformers/models/layoutlmv2/image_processing_layoutlmv2.py#L95)에서 확인하실 수 있습니다
 
-    - 최종 Text Embedding
+    - **최종 Text Embedding**
 
         - LayoutLM에서는 각 Token에 대해 Text Embedding과 Bounding box Embedding을 그냥 더했지만, \
         LayoutLMV2에서는 Text Embedding의 차원을 768이라고 했을 때,\
@@ -180,7 +187,7 @@ Document Understanding](https://arxiv.org/pdf/2012.14740)
     
         - 자세한 코드 내용은 다음 [링크](https://github.com/huggingface/transformers/blob/v4.41.0/src/transformers/models/layoutlmv2/modeling_layoutlmv2.py#L78)에서 확인하실 수 있습니다
     
-    - 최종 Input Token Sequence
+    - **최종 Input Token Sequence**
         - 최종적으로 모델의 앞단에 `49`개의 이미지 Token이 들어가게 되고,\
         이에 이어서 텍스트 Token이 Max_seuqence_length(`512`)만큼 들어갑니다
         - 결국 최종 max_sequence_length는 `561`개가 됩니다
@@ -205,8 +212,11 @@ Document Understanding](https://arxiv.org/pdf/2012.14740)
 - seed : 42
 - batch_size : 8
 
+<br/>
 
 ### | `LayoutLM` vs `LayoutLMV2`
+
+#### 성능 비교
 
 | Model | F1 | em | em_no_space | #Parameters | steps |
 | --- | --- | --- | --- | --- | --- |
@@ -307,6 +317,6 @@ Inference 단계에서 막는 다면 `COMAPNY가 아님에도 COMPANY라고 예�
 
 
 ## References
-- [LayoutLM: Pre-training of Text and Layout for Document Image Understanding](https://arxiv.org/pdf/1912.13318)
+- [LayoutLM: Pre-training of Text and Layout for Document Image Understanding](https://arxiv.org/abs/1912.13318)
 - [LayoutLMv2: Multi-modal Pre-training for Visually-rich
-Document Understanding](https://arxiv.org/pdf/2012.14740)
+Document Understanding](https://arxiv.org/abs/2012.14740)

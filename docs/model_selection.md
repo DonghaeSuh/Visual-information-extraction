@@ -77,6 +77,7 @@ Tokenizing 시에 입력으로 들어오는 Token을 소문자 변환 후 Tokeni
 ## Baseline 모델 선정
 
 ### | BERT-uncased
+> 한 줄 요약 : 마스킹한 토큰을 복원하는 사전학습을 해 놓으면, 다른 문제를 더 쉽게 풀 수 있다!
 - **구조** : Transformer Encoders
 - **사전학습** 
     - 방식 
@@ -94,6 +95,7 @@ Tokenizing 시에 입력으로 들어오는 Token을 소문자 변환 후 Tokeni
 <br/>
 
 ### | RoBERTa
+> 한 줄 요약 : BERT를 더욱 강인하게
 - **구조** : Transformer Encoders
 - **사전학습** 
     - 방식 
@@ -112,6 +114,7 @@ Tokenizing 시에 입력으로 들어오는 Token을 소문자 변환 후 Tokeni
 <br/>
 
 ### | LayoutLM-uncased
+> 한 줄 요약 : 이미지에서 추출된 텍스트가 주어질 경우, 텍스트만 사용하지 말고 이미지도 사용하자!
 - **구조** : Transformer Encoders
 - **사전학습**
     - 방식 
