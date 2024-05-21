@@ -8,7 +8,7 @@ from seqeval.metrics import (classification_report, f1_score, precision_score,
 from torch.utils.data import DataLoader, Dataset, SequentialSampler
 from tqdm import tqdm
 from PIL import Image
-from transformers import LayoutLMv2ImageProcessor
+import unicodedata
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +32,7 @@ class SROIEDataset(Dataset):
             features = torch.load(cached_features_file)
         else:
             logger.info("Creating features from dataset file at %s", args.data_dir)
-            examples = read_examples_from_file(args.data_dir, mode)
+            examples = read_examples_from_file(args.data_dir, mode, convert_to_uncased=args.convert_to_uncased)
             features = convert_examples_to_features(
                 examples,
                 labels,
@@ -62,21 +62,21 @@ class SROIEDataset(Dataset):
         self.features = features
         # Convert to Tensors and build dataset
         self.all_input_ids = torch.tensor(
-            [f.input_ids for f in features], dtype=torch.long # (bs, max_seq_length)
+            [f.input_ids for f in features], dtype=torch.long # (N, max_seq_length)
         )
         self.all_input_mask = torch.tensor(
-            [f.input_mask for f in features], dtype=torch.long # (bs, max_seq_length)
+            [f.input_mask for f in features], dtype=torch.long # (N, max_seq_length)
         )
         self.all_segment_ids = torch.tensor(
-            [f.segment_ids for f in features], dtype=torch.long # (bs, max_seq_length)
+            [f.segment_ids for f in features], dtype=torch.long # (N, max_seq_length)
         )
-        self.all_label_ids = torch.tensor( # (bs, max_seq_length)
+        self.all_label_ids = torch.tensor( # (N, max_seq_length)
             [f.label_ids for f in features], dtype=torch.long
         )
-        self.all_bboxes = torch.tensor([f.boxes for f in features], dtype=torch.long) # (bs, max_seq_length, 4)
+        self.all_bboxes = torch.tensor([f.boxes for f in features], dtype=torch.long) # (N, max_seq_length, 4)
 
         self.all_images = torch.tensor(
-            [f.image for f in features], dtype=torch.long # (bs, 3, 244, 244)
+            [f.image for f in features], dtype=torch.float # (N, 3, 244, 244)
         )
 
     def __len__(self):
@@ -150,7 +150,27 @@ class InputFeatures(object):
         self.page_size = page_size
 
 
-def read_examples_from_file(data_dir, mode):
+def convert_to_uncased_text(text):
+    """
+    Convert text to lowercase and remove accents.
+
+    Args:
+        text (str): The input text to preprocess.
+
+    Returns:
+        str: The preprocessed text.
+    """
+    # 소문자로 변환
+    text = text.lower()
+    
+    # 악센트 제거
+    normalized_text = unicodedata.normalize('NFKD', text)
+    processed_text = ''.join([c for c in normalized_text if not unicodedata.combining(c)])
+    
+    return processed_text
+
+
+def read_examples_from_file(data_dir, mode, convert_to_uncased=False):
     file_path = os.path.join(data_dir, "{}.txt".format(mode))
     box_file_path = os.path.join(data_dir, "{}_box.txt".format(mode))
     image_file_path = os.path.join(data_dir, "{}_image.txt".format(mode))
@@ -198,7 +218,11 @@ def read_examples_from_file(data_dir, mode):
                 assert len(bsplits) == 2
                 assert len(isplits) == 4
                 assert splits[0] == bsplits[0]
-                words.append(splits[0])
+
+                if convert_to_uncased:
+                    words.append(convert_to_uncased_text(splits[0]))
+                else:
+                    words.append(splits[0])
                 if len(splits) > 1:
                     labels.append(splits[-1].replace("\n", ""))
                     box = bsplits[-1].replace("\n", "")
@@ -368,7 +392,7 @@ def convert_examples_to_features(
         assert len(label_ids) == max_seq_length
         assert len(token_boxes) == max_seq_length
 
-        # image preprocessing if model is LayoutLMV2
+        # image preprocessing if model is LayoutLMV2 and LayoutLMV3
         if processor:
             image = processor.preprocess(example.image) # (defaults) do_resize = True, size = (244, 244)
             image = image.pixel_values[0] # (1, 3, 244, 244) -> (3, 244, 244)
@@ -435,9 +459,12 @@ def evaluate(args, model, tokenizer, processor, labels, pad_token_label_id, mode
             if args.model_type in ["layoutlmv2"]:
                 inputs["bbox"] = batch[4].to(args.device)
                 inputs["image"] = batch[5].to(args.device)
+            if args.model_type in ["layoutlmv3"]:
+                inputs["bbox"] = batch[4].to(args.device)
+                inputs["pixel_values"] = batch[5].to(args.device)
             inputs["token_type_ids"] = (
                 batch[2].to(args.device)
-                if args.model_type in ["bert", "layoutlm"]
+                if args.model_type in ["bert", "layoutlm", "layoutlmv2", "layoutlmv3"]
                 else None
             )  # RoBERTa don"t use segment_ids
             outputs = model(**inputs)
