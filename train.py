@@ -34,12 +34,15 @@ from tqdm import tqdm, trange
 from transformers import (BERT_PRETRAINED_CONFIG_ARCHIVE_MAP,
                           LAYOUTLM_PRETRAINED_CONFIG_ARCHIVE_MAP,
                           ROBERTA_PRETRAINED_CONFIG_ARCHIVE_MAP, 
-                          LAYOUTLMV2_PRETRAINED_CONFIG_ARCHIVE_MAP, AdamW,
+                          LAYOUTLMV2_PRETRAINED_CONFIG_ARCHIVE_MAP, 
+                          LAYOUTLMV3_PRETRAINED_CONFIG_ARCHIVE_MAP, 
+                          AdamW,
                           BertConfig, BertForTokenClassification,
                           BertTokenizer, LayoutLMConfig,
                           LayoutLMForTokenClassification, RobertaConfig,
                           RobertaForTokenClassification, RobertaTokenizer,
                           LayoutLMv2Config, LayoutLMv2ForTokenClassification, LayoutLMv2Tokenizer, LayoutLMv2ImageProcessor,
+                          LayoutLMv3Config, LayoutLMv3ForTokenClassification, LayoutLMv3Tokenizer, LayoutLMv3ImageProcessor,
                           get_linear_schedule_with_warmup)
 from utils import SROIEDataset, evaluate
 
@@ -55,6 +58,7 @@ ALL_MODELS = sum(
             ROBERTA_PRETRAINED_CONFIG_ARCHIVE_MAP,
             LAYOUTLM_PRETRAINED_CONFIG_ARCHIVE_MAP,
             LAYOUTLMV2_PRETRAINED_CONFIG_ARCHIVE_MAP,
+            LAYOUTLMV3_PRETRAINED_CONFIG_ARCHIVE_MAP
         )
     ),
     (),
@@ -65,6 +69,7 @@ MODEL_CLASSES = {
     "roberta": (RobertaConfig, RobertaForTokenClassification, RobertaTokenizer, None),
     "layoutlm": (LayoutLMConfig, LayoutLMForTokenClassification, BertTokenizer, None),
     "layoutlmv2": (LayoutLMv2Config, LayoutLMv2ForTokenClassification, LayoutLMv2Tokenizer, LayoutLMv2ImageProcessor),
+    "layoutlmv3": (LayoutLMv3Config, LayoutLMv3ForTokenClassification, LayoutLMv3Tokenizer, LayoutLMv3ImageProcessor),
 }
 
 # NOTE: DO NOT MODIFY THE FOLLOWING PATHS
@@ -238,9 +243,12 @@ def train(  # noqa C901
             if args.model_type in ["layoutlmv2"]:
                 inputs["bbox"] = batch[4].to(args.device)
                 inputs["image"] = batch[5].to(args.device)
+            if args.model_type in ["layoutlmv3"]:
+                inputs["bbox"] = batch[4].to(args.device)
+                inputs["pixel_values"] = batch[5].to(args.device)
             inputs["token_type_ids"] = (
                 batch[2].to(args.device)
-                if args.model_type in ["bert", "layoutlm", "layoutlmv2"]
+                if args.model_type in ["bert", "layoutlm", "layoutlmv2", "layoutlmv3"]
                 else None
             )  # RoBERTa don"t use segment_ids
 
@@ -508,6 +516,11 @@ def main():  # noqa C901
         type=str,
         help="Description of the model for wandb logging."
     )
+    parser.add_argument(
+        "--convert_to_uncased",
+        action="store_true",
+        help="Convert the model to uncased version. for layoutlmv3"
+    )
 
     args = parser.parse_args()
 
@@ -599,11 +612,11 @@ def main():  # noqa C901
     )
 
     if processor:
-        processor = LayoutLMv2ImageProcessor.from_pretrained(
-            args.model_name_or_path,
-            cache_dir=args.cache_dir if args.cache_dir else None,
-            apply_ocr = False, # In Token Classification with word label, OCR is not needed
-        )
+            processor = processor.from_pretrained(
+                args.model_name_or_path,
+                cache_dir=args.cache_dir if args.cache_dir else None,
+                apply_ocr = False, # In Token Classification with word label, OCR is not needed
+            )
 
     if args.local_rank == 0:
         torch.distributed.barrier()  # Make sure only the first process in distributed training will download model & vocab

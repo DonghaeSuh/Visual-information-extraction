@@ -10,12 +10,14 @@ from transformers import (BERT_PRETRAINED_CONFIG_ARCHIVE_MAP,
                           LAYOUTLM_PRETRAINED_CONFIG_ARCHIVE_MAP,
                           ROBERTA_PRETRAINED_CONFIG_ARCHIVE_MAP, 
                           LAYOUTLMV2_PRETRAINED_CONFIG_ARCHIVE_MAP,
+                          LAYOUTLMV3_PRETRAINED_CONFIG_ARCHIVE_MAP,
                           BertConfig,
                           BertForTokenClassification, BertTokenizer,
                           LayoutLMConfig, LayoutLMForTokenClassification,
                           RobertaConfig, RobertaForTokenClassification,
                           RobertaTokenizer,
-                          LayoutLMv2Config, LayoutLMv2ForTokenClassification, LayoutLMv2Tokenizer, LayoutLMv2ImageProcessor)
+                          LayoutLMv2Config, LayoutLMv2ForTokenClassification, LayoutLMv2Tokenizer, LayoutLMv2ImageProcessor,
+                          LayoutLMv3Config, LayoutLMv3ForTokenClassification, LayoutLMv3Tokenizer, LayoutLMv3ImageProcessor)
 from utils import evaluate
 
 logger = logging.getLogger(__name__)
@@ -28,6 +30,7 @@ ALL_MODELS = sum(
             ROBERTA_PRETRAINED_CONFIG_ARCHIVE_MAP,
             LAYOUTLM_PRETRAINED_CONFIG_ARCHIVE_MAP,
             LAYOUTLMV2_PRETRAINED_CONFIG_ARCHIVE_MAP,
+            LAYOUTLMV3_PRETRAINED_CONFIG_ARCHIVE_MAP
         )
     ),
     (),
@@ -38,6 +41,7 @@ MODEL_CLASSES = {
     "roberta": (RobertaConfig, RobertaForTokenClassification, RobertaTokenizer, None),
     "layoutlm": (LayoutLMConfig, LayoutLMForTokenClassification, BertTokenizer, None),
     "layoutlmv2": (LayoutLMv2Config, LayoutLMv2ForTokenClassification, LayoutLMv2Tokenizer, LayoutLMv2ImageProcessor),
+    "layoutlmv3": (LayoutLMv3Config, LayoutLMv3ForTokenClassification, LayoutLMv3Tokenizer, LayoutLMv3ImageProcessor),
 }
 
 # NOTE: DO NOT MODIFY THE FOLLOWING PATHS
@@ -158,10 +162,9 @@ def main():  # noqa C901
         help="For distributed training: local_rank",
     )
     parser.add_argument(
-        "--average_mode",
-        default='macro',
-        type=str,
-        help="Average mode for seqeval library."
+        "--convert_to_uncased",
+        action="store_true",
+        help="Convert the model to uncased version. for layoutlmv3"
     )
 
     args = parser.parse_args()
@@ -211,12 +214,12 @@ def main():  # noqa C901
     model.to(args.device)
 
     if processor:
-        processor = LayoutLMv2ImageProcessor.from_pretrained(
+        processor = processor.from_pretrained(
             args.model_name_or_path,
             cache_dir=args.cache_dir if args.cache_dir else None,
             apply_ocr = False, # In Token Classification with word label, OCR is not needed
         )
-    
+
     result, predictions = evaluate(
         args, model, tokenizer, processor, labels, pad_token_label_id, mode=args.mode
     )
