@@ -79,7 +79,12 @@ Tokenizing 시에 입력으로 들어오는 Token을 소문자 변환 후 Tokeni
 ### | BERT-uncased
 - **구조** : Transformer Encoders
 - **사전학습** 
-    - 방식 : [MASK] Token prediction, Next Sentence Prediction(NSP)
+    - 방식 
+        - **[MASK] Token prediction**
+            - 입력의 일부 Token을 [MASK] Token으로 치환하고 이를 복원하도록 학습
+            
+        - **Next Sentence Prediction(NSP)**
+            - Sentence 1, Sentence 2를 [SEP] Token을 기준으로 이어붙이고, Sentence 2가 Sentence 1에 이어지는 다음 Sentence인지 이진 분류
     - 데이터 : [Wikipedia](https://huggingface.co/datasets/wikipedia), [Bookcorpus](https://huggingface.co/datasets/bookcorpus)
 - **Tokenizer** : [WordPiece](https://arxiv.org/abs/1609.08144)
 
@@ -91,7 +96,9 @@ Tokenizing 시에 입력으로 들어오는 Token을 소문자 변환 후 Tokeni
 ### | RoBERTa
 - **구조** : Transformer Encoders
 - **사전학습** 
-    - 방식 : [MASK] Token prediction
+    - 방식 
+        - **[MASK] Token prediction**
+        
     - 데이터 : [Wikipedia](https://huggingface.co/datasets/wikipedia), [Bookcorpus](https://huggingface.co/datasets/bookcorpus)
     - BERT와의 차이점
         - 더 큰 Batch_size, 더 긴 학습기간
@@ -107,19 +114,19 @@ Tokenizing 시에 입력으로 들어오는 Token을 소문자 변환 후 Tokeni
 ### | LayoutLM-uncased
 - **구조** : Transformer Encoders
 - **사전학습**
-    - 방식 : Masked Visual-Language Model(MVLM), Multi-label Document Classification(MDC)
-        - Masked Visual-Language Model(MVLM)\
-        특정 Token을 Masking 한 후, 맥락(context)와 해당 Token의 이미지상 2D 위치정보를 활용해\
+    - 방식 
+        - **Masked Visual-Language Model(MVLM)**
+            - 특정 Token을 Masking 한 후, 맥락(context)와 해당 Token의 이미지상 2D 위치정보를 활용해\
         Masking된 Token을 복원하는 방식으로 학습
 
-        - Multi-label Document Classification(MDC) *(optional)*\
-        Document Image별 Multiple Tag를 [CLS] 토큰의 최종 출력을 이용해 예측하도록 학습
+        - **Multi-label Document Classification(MDC)** *(optional)*
+            - Document Image별 Multiple Tag를 [CLS] 토큰의 최종 출력을 이용해 예측하도록 학습
 
-    - 데이터 : IIT-CDIP Test Collection 1.0
-        - IIT-CDIP Test Collection 1.0\
-        구성 : 스캔된 Image, OCR을 통해 얻은 Document, 추가적인 Metadata\
-        Scale : 6M Scanned Documents + 11M Scanned Document Images\
-        Metadata : [ Title, Organization Authors, Person Authors, Document Date, Document Type, Bates Number, Page Count, collection ]
+    - 데이터 
+        - **IIT-CDIP Test Collection 1.0**
+            - 구성 : 스캔된 Image, OCR을 통해 얻은 Document, 추가적인 Metadata
+            - Scale : 6M Scanned Documents + 11M Scanned Document Images
+            - Metadata : [ Title, Organization Authors, Person Authors,  Document Date, Document Type, Bates Number, Page Count, collection ]
 
 - **Tokenizer** : [WordPiece](https://arxiv.org/abs/1609.08144)
 - **선정 모델** : [`microsoft/layoutlm-base-uncased`](https://huggingface.co/microsoft/layoutlm-base-uncased), [`microsoft/layoutlm-large-uncased`](https://huggingface.co/microsoft/layoutlm-large-uncased)
