@@ -35,14 +35,15 @@ Baseline 모델 선정을 위한 근거를 잡습니다
 - [문제 정의](./overview.md)를 통해 정리한 Task를 잘 푸려면 Task에 적절한 모델 구조가 무엇인지 찾아봅니다
 - 현재의 Task를 요약하면, 문맥(context) 속에서 Token단위로 \
 [`O`, `company`, `address`, `data`, `total`, `[pad]`] 중에서 1개의 라벨을 예측해야하는 **Token Classification Task**입니다
-- 즉, 전체 sequence가 들어오면 모든 Token간의 순서 정보와 상호 연관성 정보를 통해 해당 Token에 적절한 라벨을 부여할 수 있는 구조여야 합니다
+- 즉, 전체 sequence가 들어오면 모든 Token들간의 순서 정보와 상호 연관성 정보를 통해 해당 Token에 적절한 라벨을 부여할 수 있는 구조여야 합니다
 
 
 - 이에 **적절한 모델 구조는 [Transformer](https://arxiv.org/abs/1706.03762)의 Encoder 구조**입니다
     - Transformer의 Encoder는
-        - postitional encoding or embedding을 통해 Token간의 순서정보를 담을 수 있고
-        - Masking 되는 부분 없이, Self-Attention 연산을 통해 전체 입력 Token간의 상호 연관성 정보를 담을 수 있습니다
-    - Transformer의 Decoder의 경우 Self-Attention 사이에 Masking 되는 부분이 존재해 전체 입력 Token간의 상호 연관성이 아닌 현재 위치 이전의 Token간의 상호 연관성 정보밖에 사용하지 못합니다
+        - postitional encoding or embedding을 통해 Token들간의 순서정보를 담을 수 있고
+        - Masking 되는 부분 없이, Self-Attention 연산을 통해 전체 입력 Token들간의 상호 연관성 정보를 담을 수 있습니다
+    - Transformer의 Decoder의 경우 Self-Attention 사이에 Masking 되는 부분이 존재해 전체 입력 Token들간의 상호 연관성이 아닌 \
+    현재 위치 이전의 Token들간의 상호 연관성 정보밖에 사용하지 못합니다
 
         - 이런 구조 때문에, Decoder-Only LLMs에 길고 자세한 Prompt를 집어넣는다고 할 지라도 어려운 Token classification 문제를 잘 풀지 못하는 이유로도 유추해볼 수 있습니다
         - 이 한계를 넘기 위해, [Label Supervised LLaMA Finetuning](https://arxiv.org/abs/2310.01208)에서는 Decoder의 Masked Self-Attention 속 Causal Masking을 제거하고 fine-tuning을 진행하였고 few-shot에 비해 유의미한 성능 차이를 보였습니다
@@ -56,7 +57,7 @@ Baseline 모델 선정을 위한 근거를 잡습니다
 **Token Sequence 내 `[MASK]` Token에 들어갈 적절한 Token을 예측하는 방식**입니다 
 
     - 이 사전학습을 통해 모델은 문맥(context) 정보를 반영해 하나의 Token을 예측해내는 능력을 배우게 되기에\
-    현재 Task인 문맥(context) 정보를 반영해 현재 Token의 Token을 분류해내는 데에 도움을 줄 수 있습니다
+    현재 Task인 문맥(context) 정보를 반영해 현재 Token의 라벨을 분류해내는 데에 도움을 줄 수 있습니다
 
 <br/>
 

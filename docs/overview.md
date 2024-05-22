@@ -1,7 +1,7 @@
 # Introduction
 스캔된 영어 영수증 이미지에서 Entity를 추출하는 Task입니다 (Key-Value Extraction)
 
-SROIE 데이터셋을 사용하며 **입력**으로 문서 이미지 대신 **단어와 그 단어에 해당하는 bounding box 좌표**가 주어졌을 때, 
+SROIE 데이터셋을 사용하며, **입력**으로 문서 이미지 대신 **단어와 그 단어에 해당하는 bounding box 좌표**가 주어졌을 때, 
 
 그 단어에 해당하는 **Entity [company, date, address, total]** 를 맞추는 NER(Named Entity Recognition) Task입니다
 
@@ -15,7 +15,7 @@ SROIE 데이터셋을 사용하며 **입력**으로 문서 이미지 대신 **�
 - `*/img` : SROIE 데이터셋의 이미지 파일들
 - `*.txt` : 각 바운딩 박스에 대한 BIO 태그 정보가 [conll 형식](https://simpletransformers.ai/docs/ner-data-formats/#text-file-in-conll-format)으로 제공
 - `*_image.txt` : 각 이미지의 각 바운딩 박스에 대한 좌표 정보
-- `*_box.txt` : 각 바운딩 박스의 [정규화](https://simpletransformers.ai/docs/ner-data-formats/#text-file-in-conll-format)된 좌표 정보
+- `*_box.txt` : 각 바운딩 박스의 정규화된 좌표 정보
 
 `*/entities`는 훈련 또는 테스트일 수 있습니다 (예: /entities → train/entities)
 

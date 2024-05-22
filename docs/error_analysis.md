@@ -35,7 +35,7 @@ baseline이 틀리는 샘플이 무엇이고, 이들의 특징이 무엇인지 �
 | Model | F1 | em | em_no_space | #Parameters | steps |
 | --- | --- | --- | --- | --- | --- |
 | `google-bert/bert-base-uncased` | 0.8142 | 46.18 | 46.18 | 110M | 600 |
-| `microsoft/layoutlm-base-uncased` | **0.8277** | 50.36 | 50.36 | 113M | 600 |
+| `microsoft/layoutlm-base-uncased` | 0.8277 | 50.36 | 50.36 | 113M | 600 |
 | `microsoft/layoutlm-large-uncased` | **0.8506** | 49.63 | 49.63 | 343M | 600 |
 
 <br/>
@@ -104,7 +104,6 @@ dev 데이터는 **126개**의 샘플로 이루어져 있습니다
 실제 모델 학습시, 각 word의 첫번째 Token이 라벨을 예측하고 나머지 Token은 [PAD]를 예측하도록 구성되어 있으므로 \
 **첫번째 Token**이 무엇인지 확인합니다
 
-f1-score의 특성상 f1-score가 0인 경우는 precision 혹은 recall이 0 이거나, 둘 다 0인 경우입니다
 
 <br/>
 
@@ -154,7 +153,7 @@ f1-score의 특성상 f1-score가 0인 경우는 precision 혹은 recall이 0 �
 
 - 실제 모델이 라벨 예측을 진행하는 `첫 번째 Token`만 확인했을 때에는, `1-3자리 숫자`, 또는 `화폐 단위`가 사용됩니다
 
-- 코드는 [analysis_error.ipynb](../data_analysis/analysis_error.ipynb)에서 확인해볼 수 있습니다
+- 코드는 [analysis_error.ipynb](../data_analysis/analysis_error.ipynb)에서 확인해보실 수 있습니다
 
 <br/>
 
@@ -291,10 +290,12 @@ f1-score의 특성상 f1-score가 0인 경우는 precision 혹은 recall이 0 �
 
 ### | `TOTAL`라벨이 아니지만 `TOTAL`과 같은 특징을 가지는 word 속 다른 숫자가 존재하는지 확인합니다
 
-- word 속에 숫자가 많이 존재하고 그 숫자를 Tokenizing 했을 때의 첫번째 Token이 `TOTAL`라벨에 해당하는 숫자의 첫번째 Token과 동일할 경우 \
-    모델은 정확하게 어떤 값이 `TOTAL`인지 구분하기가 힘들것입니다
+- 문장 속에 숫자가 많이 존재하고,
+- 그 숫자를 Tokenizing 했을 때의 첫번째 Token이 
+- `TOTAL`라벨에 해당하는 숫자의 첫번째 Token과 비슷한 숫자일 경우,
+- 모델은 정확하게 어떤 값이 `TOTAL`인지 구분하기가 힘들것입니다
 
-    -> 이 가설을 확인하기 위해 `TOTAL`라벨이 아니지만 `TOTAL`과 같은 특징을 가지는 word 속 다른 숫자가 존재하는지 확인합니다
+    -> 이 가설을 확인하기 위해 `TOTAL`라벨이 아니지만 `TOTAL`과 같은 특징을 가지는 문장 속 다른 숫자가 존재하는지 확인합니다
         
     -> 더 나아가, 그런 숫자들 속에서 `TOTAL` 라벨이 가지는 특징을 새롭게 찾습니다
 
@@ -413,10 +414,10 @@ Another `rm` in words :  ['RM11.40', 'RM', 'RM', 'RM', 'AMOUNT(RM)', 'TAX(RM)']
 
 ## `TOTAL`을 잘 맞추기 위한 앞으로의 개선 방향
 
-- 오답 분석을 통해 텍스트 관점에서 `TOTAL` 라벨에 해당하는 word가 가지는 특징을 추출해내어\
-그러한 word에 한해 모델 학습에 도움이 될 수 있는 화폐 단위 Token(`$`)을 추가해보고자 하였습니다
+- 오답 분석을 통해 텍스트 관점에서 `TOTAL` 라벨에 해당하는 단어가 가지는 특징을 추출해내어\
+그러한 단어에 한해 모델 학습에 도움이 될 수 있는 화폐 단위 Token(`$`)을 추가해보고자 하였습니다
 
-- 하지만, 텍스트 관점에서 `TOTAL` 라벨에 해당하는 word가 가지는 특징을 확인하기 어려웠습니다
+- 하지만, 텍스트 관점에서 `TOTAL` 라벨에 해당하는 단어가 가지는 특징을 확인하기 어려웠습니다
 
 <br/>
 

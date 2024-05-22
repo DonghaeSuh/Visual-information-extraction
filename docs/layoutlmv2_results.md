@@ -69,6 +69,8 @@ LayoutLMV2를 정리하고 결과를 분석합니다
     - Bounding box Position Embedding(x0,y0,x1,y1,width,height)
         - (x0,y)0는 Text Bounding box의 왼쪽 상단 좌표, (x1,y1)는 Text Bounding box의 오른쪽 하단 좌표입니다
         - width, height는 Text Bounding box의 width, height입니다
+
+    - 구현된 코드는 아래와 같습니다
     ```
         # https://github.com/huggingface/transformers/blob/v4.41.0/src/transformers/models/layoutlm/modeling_layoutlm.py#L50
 

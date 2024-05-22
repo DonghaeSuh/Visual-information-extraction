@@ -128,7 +128,7 @@ Document Understanding](https://arxiv.org/abs/2012.14740)
             - 위 3가지 pre-training objectives를 하나로 구성해 사용합니다
 
             - **Masked Language Modeling (MLM)**
-                 - 일부 Tokne을 무작위로 Masking하고 이를 복원하는 사전학습을 수행합니다
+                 - 일부 텍스트 Token을 무작위로 Masking하고 이를 복원하는 사전학습을 수행합니다
 
             - **Masked Image Modeling (MIM)**
                 - [ViT](https://arxiv.org/abs/2010.11929)처럼 이미지를 Patch단위로 쪼개 Token으로 만들고, 일부 Patch Token을 Masking하고 이를 복원하는 사전학습을 수행합니다
@@ -158,7 +158,8 @@ Document Understanding](https://arxiv.org/abs/2012.14740)
 
 - 2D Postion Embedding을 구하는 기준
     - Word-level Layout Position에서 Segment-level Position으로 2D Position Embedding을 구합니다
-    - 즉, 단어 단위로 layout을 달리 가져가는 것이 아니라, 같은 Segment(성격이 같은 영역) 단위로 2D Position Embedding을 가져갑니다
+    - 즉, 단어 단위로 layout을 달리 가져가는 것이 아니라, 같은 Segment(성격이 같은 영역) 단위로 동일한 2D Position Embedding을 가져갑니다
+    - 아래 예시를 통해 Segment 단위가 무엇인지 시각적으로 보실 수 있습니다
 
     <[StructuralLM: Structural Pre-training for Form Understanding](https://arxiv.org/abs/2105.11210)>
     ![alt text](img/segment_pm.png)
@@ -180,17 +181,17 @@ Document Understanding](https://arxiv.org/abs/2012.14740)
         - ( 16 x 16 ) 크기의 patch 단위로 짤라 197개의 patch를 준비합니다
         - 각 patch에 linear embedding을 통해 벡터화하고
         - 여기에 Positional Embedding(각 Token의 순서정보), 2D Positional Embedding(bounding box 위치 정보)을 더합니다
-        - 자세한 코드 내용은 다음 [링크](https://github.com/huggingface/transformers/blob/v4.41.0/src/transformers/models/layoutlmv2/modeling_layoutlmv2.py#L740)에서 확인하실 수 있습니다
+        - 자세한 코드 내용은 다음 [링크](https://github.com/huggingface/transformers/blob/v4.41.0/src/transformers/models/layoutlmv3/modeling_layoutlmv3.py#L257)에서 확인하실 수 있습니다
 
     - **최종 Text Embedding**
 
-        - LayoutLM에서는 각 Token에 대해 Text Embedding과 Bounding box Embedding을 그냥 더했지만, \
-        LayoutLMV2와 LayoutLMV3에서는 Text Embedding의 차원을 768이라고 했을 때,\
+        - LayoutLM에서는 각 Token에 대해 Text Embedding과 Bounding box Embedding을 그냥 더했습니다
+        - 하지만, LayoutLMV2와 LayoutLMV3에서는 Text Embedding의 차원을 768이라고 했을 때,\
          6개의 Bounding Box Postion Embedding의 각 차원은 128차원으로 만들고 이 6개를 concat하여 768(128*6) 차원으로 만든 후, \
          Text Embedding과 더합니다
             - 이때, (x0, x1, width)끼리 (y0, y1, hight)끼리 같은 임베딩 layer를 사용합니다
     
-        - 자세한 코드 내용은 다음 [링크](https://github.com/huggingface/transformers/blob/v4.41.0/src/transformers/models/layoutlmv2/modeling_layoutlmv2.py#L78)에서 확인하실 수 있습니다
+        - 자세한 코드 내용은 다음 [링크](https://github.com/huggingface/transformers/blob/v4.41.0/src/transformers/models/layoutlmv3/modeling_layoutlmv3.py#L229)에서 확인하실 수 있습니다
     
     - **최종 Input Token Sequence**
         - 최종적으로 모델의 앞단에 텍스트 Token이 Max_seuqence_length(`512`)만큼 들어갑니다
@@ -267,8 +268,7 @@ Document Understanding](https://arxiv.org/abs/2012.14740)
 | microsoft/layoutlmv3-base | **85.52** | 52.23 | 52.23 | 125M | 600 |
 | microsoft/layoutlmv3-large | **89.08** | 53.53 | 53.53 | 356M | 500 |
 
-- 사전학습된 CNN가 필요없어짐에 따라 모델 크기가 줄어들었음에도 불구하고 \
-laytoutlmv3가 더 좋은 성능을 보이는 것을 확인할 수 있습니다
+- laytoutlmv3가 1-2점 정도 더 좋은 성능을 보이는 것을 확인할 수 있습니다
 
 
 

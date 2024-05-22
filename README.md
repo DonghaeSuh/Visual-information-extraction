@@ -265,7 +265,7 @@ python evaluation.py
       - `*/entites` : 각 이미지에 대한 entity key-value 추출 정보
       - `*/img` : SROIE 데이터셋의 이미지 파일들
       - `*.txt` : 각 바운딩 박스에 대한 BIO 태그 정보가 conll 형식으로 제공
-      - `*_image.txt` : 각 이미지의 각 바운딩 박스에 대한 좌표 정보
+      - `*_image.txt` : 각 이미지의 바운딩 박스에 대한 좌표 정보
       - `*_box.txt` : 각 바운딩 박스의 정규화된 좌표 정보
       - `*/entities`는 훈련 또는 테스트일 수 있습니다 (예: /entities → train/entities)
 

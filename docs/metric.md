@@ -17,6 +17,7 @@
 
 
     ![alt text](img/confusion_matrix.png)
+
     $$
     {Precision} = \frac{\text{True Positives}}{\text{True Positives} + \text{False Positives}}
     $$
@@ -28,8 +29,8 @@
 <br/>
 
 - 각각을 간단히 설명하면 다음과 같습니다
-    - Precision : 모델이 4가지 라벨중 하나라고 예측한 것들 중에서 실제 정답에 맞는 것의 비율
-    - Recall : 실제 4가지 라벨중 하나인 것에 대해 모델이 실제 해당 라벨을 맞춘 비율
+    - **Precision** : 모델이 4가지 라벨중 하나라고 예측한 것들 중에서 실제 정답에 맞는 것의 비율
+    - **Recall** : 실제 4가지 라벨중 하나인 것에 대해 모델이 실제 해당 라벨을 맞춘 비율
 
 - 이 두 가지가 모두 반영되어 있는 F1-Score(Precision과 Recall의 조화평균)를 평가지표로 선정합니다
 
@@ -49,7 +50,7 @@ Dev 데이터셋에 대해 진행했던 방식과는 다르게 f1-score를 구�
 
 이 차이로 인해 Validation f1-score는 높지만\
 실제 Test 데이터셋에 대해서는 성능이 크게 하락하는 것을 볼 수 있습니다\
-(물론, 다른 이유로 Validation에 사용하는 Dev 데이터셋의 신뢰도 문제도 존재합니다)
+(물론, Validation에 사용하는 Dev 데이터셋의 신뢰도 문제도 존재합니다)
 
 그 이유에 대해 분석하였고, Test 데이터셋에 대해 높은 점수를 받기 위해서\
 어떻게 모델을 학습해야 하는지를 이해하고 앞으로의 실험 수행 방향을 정했습니다
@@ -62,9 +63,9 @@ Dev 데이터셋에 대해 진행했던 방식과는 다르게 f1-score를 구�
 
 - dev 데이터가 입력으로 들어갈 때 f1-score 계산이 어떻게 되는지 살펴보겠습니다
 - label이 [PAD]이 아닌 token에 대해서만 해당 token을 학습된 모델에 넣었을 때의 라벨을 예측값으로 사용합니다
-- 각 샘플 단위로 모든 라벨은 2차원 리스트로 준비가 됩니다
-    - target : [ [sample1_target1, tample1_target2, … ], [sample2_target1, sample2_target2, .. ]
-    - predict : [ [sample1_predict1, tample1_predict2, … ], [sample2_predict1, sample2_predict2, .. ]
+- 각 샘플 단위로 모든 라벨은 리스트로 준비가 됩니다
+    - **target** : [ [sample1_target1, sample1_target2, … ], [sample2_target1, sample2_target2, .. ]
+    - **predict** : [ [sample1_predict1, sample1_predict2, … ], [sample2_predict1, sample2_predict2, .. ]
 
 - 해당 데이터를 [seqeval](https://github.com/chakki-works/seqeval).metric의 precision_score, recal_score, f1_score를 활용해 점수를 구합니다
     
@@ -114,12 +115,12 @@ $$
 
 <br/>
 
-- 각 샘플 단위로 모든 라벨은 2차원 리스트로 준비가 됩니다
+- 각 샘플 단위로 모든 라벨은 리스트로 준비가 됩니다
 
-    - predict : [ [sample1_predict1, tample1_predict2, … ], [sample2_predict1, sample2_predict2, .. ]
+    - **predict** : [ [sample1_predict1, sample1_predict2, … ], [sample2_predict1, sample2_predict2, .. ]
 - 각 샘플(file) 마다 4개의 라벨 [”company”, “date”, “address”, “total”] 에 해당하는 값을 key-value 형태로 저장합니다
-- value에 해당하는 단어들은 모두 “ “(공백)을 기준으로 이어붙입니다(join)
-    - predict : { filename : { ”company” : “word” , “date” : “word”, “address” : “word” , “total” : “word” }, …}
+- value에 해당하는 단어들을 모두 “ “(공백)을 기준으로 이어붙이면(join) 아래와 같은 형태가 됩니다
+    - **predict** : { filename : { ”company” : “word” , “date” : “word”, “address” : “word” , “total” : “word” }, …}
 
 <br/>
 
@@ -142,7 +143,7 @@ $$
     - **entity_em** : 전체 (gold-infer)쌍 중에서 완전히 동일한 개수 / 전체 쌍 개수
     - **entity_f1** : 모든 (gold-infer)쌍의 character-level f1 socre 합 / 전체 쌍 개수
     - **entity_em_no_space** : 전체 (gold-infer)쌍 중에서 공백을 제외하고 완전히 동일한 개수 / 전체 쌍 개수
-    - 전체 쌍 개수 == (샘플 개수)*(라벨 개수==4)
+    - 전체 쌍 개수는 (샘플 개수)*(라벨 개수) 입니다
 
 
 <br/>
@@ -162,7 +163,7 @@ $$
 ### train과정에서 evaluate 함수를 통한 점수를 잘 얻으려면?
     
     
-**[핵심 1 ]** 라벨의 Word 길이가 긴 라벨을 잘 맞추면 됩니다! (== support가 많은 라벨의 점수가 높아야 합니다)
+**[핵심 1 ]** 라벨의 Word 길이가 긴 라벨을 잘 맞추면 됩니다! ( 즉, support가 많은 라벨의 점수가 높아야 합니다 )
     
     
                   precision    recall  **f1-score**   support
@@ -191,12 +192,12 @@ $$
     
     - 그러므로 **ADDRESS, COMPANY의 길이가 상대적으로 길고** 그 **f1-score의 값 또한 크기 때문에**
     - TOTAL의 f1-score점수가 낮아도 **micro avg의 점수는 전체에 대해 계산**을 하기 때문에
-    - 전체의 대다수를 차지하는 ADDRESS,COMPANY의 점수를 따라갑니다
+    - 전체의 대다수를 차지하는 `ADDRESS`,`COMPANY`의 점수를 따라갑니다
     - 실제 라벨별 길이를 확인해보면 아래와 같습니다
 
         ![alt text](img/label_length.png)
 
-
+    - 확실히, `COMPANY`와 `ADDRESS`의 길이가 길고, `DATE`와 `TOTAL`의 길이가 짧은 것을 보실 수 있습니다
 
 <br/>
 <br/>
