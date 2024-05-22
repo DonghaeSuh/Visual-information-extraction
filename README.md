@@ -21,15 +21,16 @@
 ## Summary
 스캔된 영어 영수증 이미지에서 Entity를 추출하는 Task입니다 (Key-Value Extraction)
 
-[SROIE 데이터셋](https://arxiv.org/abs/2103.10213)을 사용하며 **입력**으로 문서 이미지 대신 **단어와 그 단어에 해당하는 bounding box 좌표**가 주어졌을 때, 그 단어에 해당하는 **Entity [company, date, address, total]** 를 맞추는 **NER(Named Entity Recognition) Task**입니다
+[SROIE 데이터셋](https://arxiv.org/abs/2103.10213)을 사용하며 **입력**으로 문서 이미지 대신 **단어와 그 단어에 해당하는 bounding box 좌표**가 주어졌을 때,\
+그 단어에 해당하는 **Entity [company, date, address, total]** 를 맞추는 **NER(Named Entity Recognition) Task**입니다
 
 본 Task를 풀기 위해 [Transformer](https://arxiv.org/abs/1706.03762) Encoder 구조의 사전학습된 모델을 Baseline으로 선정하였고, `TOTAL` 과 `COMPANY` 라벨을 잘 맞추지 못하는 것을 확인했습니다
 
-이를 해결하기 위해 **오답의 특징을 분석**한 다음, 
+이를 해결하기 위해 **오답의 특징을 분석**한 후, 
 
-- `모델 관점`에서는 **LayoutLM을 V1부터 V3** 까지 시도하며 성능 개선을 시도하였고
+- `모델 관점`에서는 **LayoutLM을 V1부터 V3**까지 시도하며 성능 개선을 시도하였고
 
-- `데이터 관점`에서는 **각 라벨의 문장 내 위치**를 반영해 **Inference단계에서 후처리**하여 성능 개선을 시도하였습니다
+- `데이터 관점`에서는 **각 라벨의 문장 내 위치**를 반영해 **Inference 단계에서 후처리**하여 성능 개선을 시도하였습니다
 
 <br/>
 
@@ -51,12 +52,12 @@
 
 ### Hardware
 사용한 하드웨어는 다음과 같습니다
-- Local
+- **Local**
     - AMD Ryzen 5 7600 6-Core Processor 3.80 GHz
     - NVIDIA® GeForce® RTX 4060Ti , 8GB
     - OS : WSL2 Ubuntu 20.04
 
-- Google Colab
+- **Google Colab**
     - Intel(R) Xeon(R) 8-Core Processor 2.20GHz
     - NVIDIA® L4 , 24GB 
 
@@ -77,16 +78,16 @@ Mac, Windows, Linux에서 [conda](https://docs.continuum.io/free/anaconda/instal
    conda env create -f env/requirements.yml
    ```
 
-   - 위를 통해 본 레포지토리에 필요한 모든 패키지들이 설치된 `Upstage_NLP_Task`라는 이름의 conda 가상환경이 생깁니다
+   - 위를 통해 본 레포지토리에 필요한 모든 패키지들이 설치된 `Upstage_NLP_Task`라는 이름의 conda 가상환경이 생성됩니다
 
 
-3. 새로운 가상환경을 활성화 시킵니다
+3. 새로운 가상환경을 활성화합니다
 
    ```
    conda activate Upstage_NLP_Task
    ```
 
-   or 
+   또는
 
    ```
    source activate Upstage_NLP_Task
@@ -106,11 +107,12 @@ Mac, Windows, Linux에서 [conda](https://docs.continuum.io/free/anaconda/instal
 ┃ ┣ 📜analysis_bboxes.ipynb
 ┃ ┣ 📜analysis_error.ipynb
 ┃ ┣ 📜analysis_metric.ipynb
+┃ ┣ 📜analysis_total_label.ipynb
 ┃ ┣ 📜analysis_train_dev_split.ipynb
-┣ 📂data_analysis
+┣ 📂docs
 ┃ ┣ 📂img
-┃ ┣ 📜baseline_results.md
 ┃ ┣ 📜EDA.md
+┃ ┣ 📜baseline_results.md
 ┃ ┣ 📜error_analysis.md
 ┃ ┣ 📜layoutlmv2_results.md
 ┃ ┣ 📜layoutlmv3_results.md
@@ -118,18 +120,18 @@ Mac, Windows, Linux에서 [conda](https://docs.continuum.io/free/anaconda/instal
 ┃ ┣ 📜model_selection.md
 ┃ ┗ 📜overview.md
 ┣ 📂env
-┃ ┣ 📜environment.yml
-┃ ┗ 📜requirements.txt
+┃ ┣ 📜requirements.txt
+┃ ┗ 📜requirements.yml
 ┣ 📂logs
 ┃ ┣ 📜bert-base.log
 ┃ ┣ 📜layoutlm-base.log
-┃ ┗ 📜layoutlm-large-log.log
+┃ ┗ 📜layoutlm-large.log
 ┣ 📜.gitignore
+┣ 📜README.md
 ┣ 📜evaluation.py
 ┣ 📜inference.py
-┣ 📜README.md
-┣ 📜train_dev_split.py
 ┣ 📜train.py
+┣ 📜train_dev_split.py
 ┗ 📜utils.py
 ```
 
@@ -350,7 +352,7 @@ python evaluation.py
 <br/>
 <br/>
 
-- **layoutLMv2 모델의 성능과 오답을 분석**한 결과
+- **LayoutLMV2 모델의 성능과 오답을 분석**한 결과
 
    - layoutlm의 문제였던 `TOTAL` 라벨에 대한 성능이 확연히 개선됨을 확인했습니다
    
@@ -406,7 +408,7 @@ python evaluation.py
    - 실제로 `layoutlmv3-large (uncased)`모델로 이 조건을 만족하도록 후처리한 결과\
    op_test f1-score가 `89.08` → `87.24`로 크게 떨어짐을 확인했습니다
 
-   - 자세한 내용은 [analysis_total_label](./data_analysis/analysis_total_label.ipynb)
+   - 자세한 내용은 [analysis_total_label](./data_analysis/analysis_total_label.ipynb)에서 확인할 수 있습니다.
 
 <br/>
 <br/>
@@ -422,16 +424,16 @@ python evaluation.py
 
 <br/>
 
-- **보다 질 좋은 이미지 feature를 뽑아내기 위해, 영수증 이미지를 upscaling할 수 있습니다!**
+- **보다 질 좋은 이미지 feature를 뽑아내기 위해, 영수증 이미지를 Upscaling할 수 있습니다!**
 
    이미지를 정성분석 한 결과, 노이즈가 꽤나 많이 존재함을 확인했습니다
 
-   - 스캔 상태가 좋지 못하거나 수정테이프로 인해 글자가 지워지거나
-   - 얼룩이나 도장이 찍혀있거나
-   - 먼지와 같은 잡티가 문자를 가리거나
-   - 펀치홀로 인해 글자가 짤려나가거나
-   - 영수증이 구겨지거나 찢어지거나
-   - 글자가 너무 흐리거나
+   - 스캔 상태가 좋지 못하거나 수정테이프로 인해 글자가 지워지거나,
+   - 얼룩이나 도장이 찍혀있거나,
+   - 먼지와 같은 잡티가 문자를 가리거나,
+   - 펀치홀로 인해 글자가 짤려나가거나,
+   - 영수증이 구겨지거나 찢어지거나,
+   - 글자가 너무 흐리거나,
    - 영수증이 회전되어있는 것을 확인했습니다
 
    위와 같은 `노이즈를 제거`하거나, `빈 곳을 채워넣는 식`으로 **보다 깔끔하고 선명한 이미지**를 만든다면\
