@@ -1,0 +1,26 @@
+name: Upstage_NLP_Task
+channels:
+  - pytorch
+  - nvidia
+  - defaults
+dependencies:
+  - pytorch==2.2.1
+  - torchvision==0.17.1
+  - pytorch-cuda=12.1
+  - python=3.10.10
+  - pip
+  - pip:
+      - yacs
+      - regex
+      - numpy==1.26.4
+      - pandas==2.2.0
+      - PyYAML
+      - matplotlib==3.9.0
+      - seqeval==1.2.2
+      - transformers==4.37.2
+      - tqdm==4.66.1
+      - wandb==0.17.0
+      - scikit-learn==1.4.0
+      - seaborn==0.13.0
+      - git+https://github.com/facebookresearch/detectron2.git
+      - pytorch-model-summary
