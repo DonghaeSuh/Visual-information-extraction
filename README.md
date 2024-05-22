@@ -21,7 +21,7 @@
 ## Summary
 스캔된 영어 영수증 이미지에서 Entity를 추출하는 Task입니다 (Key-Value Extraction)
 
-[SROIE 데이터셋](https://arxiv.org/abs/2103.10213)을 사용하며 **입력**으로 문서 이미지 대신 **단어와 그 단어에 해당하는 bounding box 좌표**가 주어졌을 때,\
+[SROIE Dataset](https://arxiv.org/abs/2103.10213)을 사용하며 **입력**으로 문서 이미지 대신 **단어와 그 단어에 해당하는 bounding box 좌표**가 주어졌을 때,
 그 단어에 해당하는 **Entity [company, date, address, total]** 를 맞히는 **NER(Named Entity Recognition) Task**입니다
 
 본 Task를 풀기 위해 [Transformer](https://arxiv.org/abs/1706.03762) Encoder 구조의 사전학습된 모델을 Baseline으로 선정하였고, `TOTAL` 과 `COMPANY` 라벨을 잘 맞히지 못하는 것을 확인했습니다
@@ -169,7 +169,7 @@ python train_dev_split.py
 
 #### Training
 
-`train.py` 파일 하나로 진행할 수 있습니다
+`train.py` 파일 하나로 진행하실 수 있습니다
 
 중요한 command line option은 아래와 같습니다. 자세한 옵션은 [다음](./train.py#L342)에서 확인하실 수 있습니다
 
@@ -201,7 +201,7 @@ python train.py \
 <br/>
 
 #### Inference
-`inference.py` 파일 하나로 실행할 수 있습니다
+`inference.py` 파일 하나로 실행하실 수 있습니다
 
 중요한 command line option은 아래와 같습니다. 자세한 옵션은 [다음](./inference.py#L67)에서 확인하실 수 있습니다
 
@@ -231,7 +231,7 @@ python inference.py \
 #### Evaluation
 inference를 진행하게 되면 예측 `output.csv` 파일이 `./output` 경로에 위치하게 됩니다
 
-예측값과 실제 op_test 간의 `f1-score`, `em`, `em_no_space`를 구하려면 다음 코드를 실행합니다
+예측값과 op_test 간의 `f1-score`, `em`, `em_no_space`를 구하려면 다음 코드를 실행합니다
 
 ```
 python evaluation.py
@@ -257,7 +257,7 @@ python evaluation.py
    - **Task**
       - 스캔된 영어 영수증 이미지에서 Entity를 추출하는 Task입니다 (Key-Value Extraction)
 
-      - [SROIE 데이터셋](https://arxiv.org/abs/2103.10213)을 사용하며 **입력**으로 문서 이미지 대신 **단어와 그 단어에 해당하는 bounding box 좌표**가 주어졌을 때, \
+      - [SROIE Dataset](https://arxiv.org/abs/2103.10213)을 사용하며 **입력**으로 문서 이미지 대신 **단어와 그 단어에 해당하는 bounding box 좌표**가 주어졌을 때, \
       그 단어에 해당하는 **Entity [company, date, address, total]** 를 맞히는 **NER(Named Entity Recognition) Task**입니다
 
    - **Data**
@@ -273,12 +273,12 @@ python evaluation.py
 
 - 높은 평가지표 점수를 가지는 모델을 만드는 것이 목적이기 때문에 **평가지표를 분석**하였습니다
 
-   - dev 데이터에 대해서는 utils.py의 [evaluate함수](./utils.py#L429)를 통해 f1-score를 구하지만,\
+   - dev 데이터에 대해서는 seqeval.metrics의 f1_score를 통해 f1-score를 구하지만,\
    op_test 데이터에 대한 최종 f1-score는 evaluation.py에 구현되어있는 방식으로 f1-score를 구합니다
 
-   - 이 두 방식의 차이로 인해 생기는 dev validation과 op_test validation간의 심한 성능 차이를 해결하기 위해\
-   dev 데이터를 통한 성능 평가 지표를 기존 micro-avg f1-score에서 macro-avg f1-score로 변경했습니다
-   - 자세한 내용은 [metric](./docs/metric.md#metric)에서 확인해볼 수 있습니다
+   - 두 방식의 차이로 인해 생기는 `dev validation`과 `op_test validation`간의 심한 성능 차이를 해결하기 위해\
+   dev 데이터를 통한 성능 평가 지표를 기존 micro-avg f1-score에서 **macro-avg f1-score**로 변경했습니다
+   - 자세한 내용은 [metric](./docs/metric.md#metric)에서 확인해보실 수 있습니다
 
 
 <br/>
@@ -290,7 +290,7 @@ python evaluation.py
    - 라벨이 존재하지 않는 샘플을 파악합니다
    - 라벨별 bounding box의 위치 분포를 확인하여 Token 이미지의 bounding box 좌표가\
    Token Classification 문제 해결에 도움을 줄 수 있는지 확인합니다
-- 자세한 내용은 [EDA](./docs/EDA.md)에서 확인해볼 수 있습니다
+- 자세한 내용은 [EDA](./docs/EDA.md)에서 확인해보실 수 있습니다
 
 
 <br/>
@@ -299,7 +299,7 @@ python evaluation.py
 - EDA를 통해 파악한 결과를 바탕으로 **Train, Dev 데이터를 분할**합니다
 - 이때 고려한 조건은 `Dev와 Test간의 분포`, `적절한 Dev 크기`입니다
 - 결과적으로, Train과 Dev 데이터셋을 8:2로 랜덤 샘플링하여 분리하였습니다
-   - 자세한 내용은 [학습 데이터셋](./docs/baseline_results.md#학습-데이터셋)에서 확인해볼 수 있습니다
+   - 자세한 내용은 [학습 데이터셋](./docs/baseline_results.md#학습-데이터셋)에서 확인해보실 수 있습니다
 
 <br/>
 
@@ -313,8 +313,8 @@ python evaluation.py
    - `BERT-uncased`
    - `RoBERTa`
    - `LayoutLM-uncased`
-- 자세한 내용은 [model_selection](./docs/model_selection.md)에서 확인해볼 수 있습니다
-- 또한 이들의 모델 구조와 Fine-tuning Method는 [overview](./docs/overview.md)에서 확인해볼 수 있습니다
+- 자세한 내용은 [model_selection](./docs/model_selection.md)에서 확인해보실 수 있습니다
+- 또한 이들의 모델 구조와 Fine-tuning Method는 [overview](./docs/overview.md)에서 확인해보실 수 있습니다
 
 <br/>
 
@@ -331,7 +331,7 @@ python evaluation.py
 
    - bert에 비해 bounding box의 레이아웃 정보를 추가적으로 사용하는 LayoutLM이 더 좋은 성능을 보였습니다
    - 이는 앞서 **bounding box 레이아웃 정보**가 **라벨별로 상이한 분포**를 띄기 때문에 이 정보를 사용한 것으로 볼 수 있습니다
-   - 해당 분포에 대한 시각화 정보는 [analysis_bboxes](./data_analysis/analysis_bboxes.ipynb#label별-box의-center-위치-분포-확인)의 맨 하단에서 확인하실 수 있습니다
+   - 해당 분포에 대한 시각화 정보는 [analysis_bboxes](./data_analysis/analysis_bboxes.ipynb#label별-box의-center-위치-분포-확인)의 맨 하단에서 확인해보실 수 있습니다
 
    <br/>
 
@@ -349,7 +349,7 @@ python evaluation.py
       - 그 결과, `TOTAL` 라벨에 해당하는 Token들이 대부분 **굵은(Bold) 글씨** 로 되어있는 것을 확인했습니다
       - 이에 각 Token에 해당하는 `이미지 정보`까지 반영하기 위해 LayoutLMV2를 적용했습니다
 
-   - 자세한 내용은 [baseline_results](./docs/baseline_results.md)에서 확인할 수 있습니다
+   - 자세한 내용은 [baseline_results](./docs/baseline_results.md)에서 확인해보실 수 있습니다
 
 <br/>
 <br/>
@@ -374,7 +374,7 @@ python evaluation.py
       - `COMPANY`라벨에 해당하는 Token의 경우 전체 Text의 앞부분에 오는 것을 확인했습니다
          - 이를 통해, Inference 단계에서 `전체 Text의 뒷부분에서 COMPANY로 잘못 예측`하는 것을 방지할 수 있습니다
 
-   - 자세한 내용은 [layoutlmv2_results](./docs/layoutlmv2_results.md)에서 확인할 수 있습니다
+   - 자세한 내용은 [layoutlmv2_results](./docs/layoutlmv2_results.md)에서 확인해보실 수 있습니다
 
 <br/>
 <br/>
@@ -389,7 +389,7 @@ python evaluation.py
       `소문자 변환` + `악센트 제거`라는 전처리 과정을 추가해줬습니다
       - 이를 통해 같은 조건에서 1.3점 정도의 op_test F1-score 향상을 얻어낼 수 있었습니다
 
-   - 자세한 내용은 [layoutlmv3_results](./docs/layoutlmv3_results.md)에서 확인할 수 있습니다
+   - 자세한 내용은 [layoutlmv3_results](./docs/layoutlmv3_results.md)에서 확인해보실 수 있습니다
 
 
 <br/>
@@ -408,7 +408,7 @@ python evaluation.py
    - 실제로 `layoutlmv3-large (uncased)`모델로 이 조건을 만족하도록 후처리한 결과\
    op_test f1-score가 `89.08` → `87.24`로 크게 떨어짐을 확인했습니다
 
-   - 자세한 내용은 [analysis_total_label](./data_analysis/analysis_total_label.ipynb)에서 확인할 수 있습니다.
+   - 자세한 내용은 [analysis_total_label](./data_analysis/analysis_total_label.ipynb)에서 확인해보실 수 있습니다.
 
 <br/>
 <br/>
@@ -419,9 +419,9 @@ python evaluation.py
 - 이번 Competition에서는 확실한 근거에 기반하지 않는 무작위성 실험은 지양하였기에 진행하지 않았지만,\
   아래와 같은 시도는 큰 성능 향상이 기대됩니다!
 
-   - Ensemble
-   - Hyperparameter Tuning(seed, batch_size, learning_rate, weight_decay_rate, learning scheduler)
-   - DAPT(Domain-Adaptive Pretraining) or TAPT(Task-Adaptive Pretraining)
+   - **Ensemble**
+   - **Hyperparameter Tuning**(seed, batch_size, learning_rate, weight_decay_rate, learning scheduler)
+   - **DAPT**(Domain-Adaptive Pretraining) or **TAPT**(Task-Adaptive Pretraining)
 
 
 <br/>
