@@ -3,7 +3,7 @@
 
 ![iamge](./docs/img/Logo_Light.png)
 
-
+- **서동해**의 딥러닝 코딩 테스트 결과 기록물입니다
 
 <br/>
 
