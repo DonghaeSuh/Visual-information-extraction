@@ -22,9 +22,9 @@
 스캔된 영어 영수증 이미지에서 Entity를 추출하는 Task입니다 (Key-Value Extraction)
 
 [SROIE 데이터셋](https://arxiv.org/abs/2103.10213)을 사용하며 **입력**으로 문서 이미지 대신 **단어와 그 단어에 해당하는 bounding box 좌표**가 주어졌을 때,\
-그 단어에 해당하는 **Entity [company, date, address, total]** 를 맞추는 **NER(Named Entity Recognition) Task**입니다
+그 단어에 해당하는 **Entity [company, date, address, total]** 를 맞히는 **NER(Named Entity Recognition) Task**입니다
 
-본 Task를 풀기 위해 [Transformer](https://arxiv.org/abs/1706.03762) Encoder 구조의 사전학습된 모델을 Baseline으로 선정하였고, `TOTAL` 과 `COMPANY` 라벨을 잘 맞추지 못하는 것을 확인했습니다
+본 Task를 풀기 위해 [Transformer](https://arxiv.org/abs/1706.03762) Encoder 구조의 사전학습된 모델을 Baseline으로 선정하였고, `TOTAL` 과 `COMPANY` 라벨을 잘 맞히지 못하는 것을 확인했습니다
 
 이를 해결하기 위해 **오답의 특징을 분석**한 후, 
 
@@ -46,7 +46,7 @@
 | microsoft/layoutlmv3-base (manual uncased) | 85.52 | 52.23 | 52.23 | 125M | 600 |
 | microsoft/layoutlmv3-large (manual uncased) | **89.08** | 53.53 | 53.53 | 356M | 500 |
 
-
+<br/>
 
 ## Instructions
 
@@ -87,7 +87,7 @@ Mac, Windows, Linux에서 [conda](https://docs.continuum.io/free/anaconda/instal
    conda activate Upstage_NLP_Task
    ```
 
-   또는
+   또는 아래와 같은 방법도 가능합니다
 
    ```
    source activate Upstage_NLP_Task
@@ -171,7 +171,7 @@ python train_dev_split.py
 
 `train.py` 파일 하나로 진행할 수 있습니다
 
-중요한 command line option은 아래와 같습니다. 자세한 옵션은 [다음](./train.py#L342) 확인하실 수 있습니다
+중요한 command line option은 아래와 같습니다. 자세한 옵션은 [다음](./train.py#L342)에서 확인하실 수 있습니다
 
    - `--model_name_or_path` : 모델 이름 혹은 경로
    - `--model_type` : 모델 타입
@@ -203,7 +203,7 @@ python train.py \
 #### Inference
 `inference.py` 파일 하나로 실행할 수 있습니다
 
-중요한 command line option은 아래와 같습니다. 자세한 옵션은 [다음](./inference.py#L67) 확인하실 수 있습니다
+중요한 command line option은 아래와 같습니다. 자세한 옵션은 [다음](./inference.py#L67)에서 확인하실 수 있습니다
 
    - `--model_name_or_path` : 학습된 모델 checkpoint 경로
    - `--model_type` : 모델 타입
@@ -258,16 +258,16 @@ python evaluation.py
       - 스캔된 영어 영수증 이미지에서 Entity를 추출하는 Task입니다 (Key-Value Extraction)
 
       - [SROIE 데이터셋](https://arxiv.org/abs/2103.10213)을 사용하며 **입력**으로 문서 이미지 대신 **단어와 그 단어에 해당하는 bounding box 좌표**가 주어졌을 때, \
-      그 단어에 해당하는 **Entity [company, date, address, total]** 를 맞추는 **NER(Named Entity Recognition) Task**입니다
+      그 단어에 해당하는 **Entity [company, date, address, total]** 를 맞히는 **NER(Named Entity Recognition) Task**입니다
 
    - **Data**
 
-      - */entites : 각 이미지에 대한 entity key-value 추출 정보
-      - */img : SROIE 데이터셋의 이미지 파일들
-      - *.txt : 각 바운딩 박스에 대한 BIO 태그 정보가 conll 형식으로 제공
-      - *_image.txt : 각 이미지의 각 바운딩 박스에 대한 좌표 정보
-      - *_box.txt : 각 바운딩 박스의 정규화된 좌표 정보
-      - */entities는 훈련 또는 테스트일 수 있습니다 (예: /entities → train/entities)
+      - `*/entites` : 각 이미지에 대한 entity key-value 추출 정보
+      - `*/img` : SROIE 데이터셋의 이미지 파일들
+      - `*.txt` : 각 바운딩 박스에 대한 BIO 태그 정보가 conll 형식으로 제공
+      - `*_image.txt` : 각 이미지의 각 바운딩 박스에 대한 좌표 정보
+      - `*_box.txt` : 각 바운딩 박스의 정규화된 좌표 정보
+      - `*/entities`는 훈련 또는 테스트일 수 있습니다 (예: /entities → train/entities)
 
 <br/>
 
@@ -278,7 +278,7 @@ python evaluation.py
 
    - 이 두 방식의 차이로 인해 생기는 dev validation과 op_test validation간의 심한 성능 차이를 해결하기 위해\
    dev 데이터를 통한 성능 평가 지표를 기존 micro-avg f1-score에서 macro-avg f1-score로 변경했습니다
-   - 자세한 내용은 [metric](./docs/metric#metric)에서 확인해볼수 있습니다
+   - 자세한 내용은 [metric](./docs/metric.md#metric)에서 확인해볼 수 있습니다
 
 
 <br/>
@@ -290,7 +290,7 @@ python evaluation.py
    - 라벨이 존재하지 않는 샘플을 파악합니다
    - 라벨별 bounding box의 위치 분포를 확인하여 Token 이미지의 bounding box 좌표가\
    Token Classification 문제 해결에 도움을 줄 수 있는지 확인합니다
-- 자세한 내용은 [EDA](./docs/EDA.md)에서 확인해볼수 있습니다
+- 자세한 내용은 [EDA](./docs/EDA.md)에서 확인해볼 수 있습니다
 
 
 <br/>
@@ -299,7 +299,7 @@ python evaluation.py
 - EDA를 통해 파악한 결과를 바탕으로 **Train, Dev 데이터를 분할**합니다
 - 이때 고려한 조건은 `Dev와 Test간의 분포`, `적절한 Dev 크기`입니다
 - 결과적으로, Train과 Dev 데이터셋을 8:2로 랜덤 샘플링하여 분리하였습니다
-   - 자세한 내용은 [학습 데이터셋](./docs/baseline_results#학습-데이터셋)에서 확인해볼수 있습니다
+   - 자세한 내용은 [학습 데이터셋](./docs/baseline_results.md#학습-데이터셋)에서 확인해볼 수 있습니다
 
 <br/>
 
@@ -309,17 +309,18 @@ python evaluation.py
    - `사전학습 방식과 Task간의 연관성`
    - `EDA를 통해 얻은 데이터의 특징` 
 
-- 최종 적으로 다음 3가지 모델을 선정했습니다
+- 최종적으로 다음 3가지 모델을 선정했습니다
    - `BERT-uncased`
    - `RoBERTa`
    - `LayoutLM-uncased`
 - 자세한 내용은 [model_selection](./docs/model_selection.md)에서 확인해볼 수 있습니다
+- 또한 이들의 모델 구조와 Fine-tuning Method는 [overview](./docs/overview.md)에서 확인해볼 수 있습니다
 
 <br/>
 
 
 ### | 성능 평가 - 오답 분석  - 모델 고도화
-- 모델의 **성능을 먼저 수치적을 평가**합니다
+- 모델의 **성능을 먼저 정량적으로 평가**합니다
 - 이후, **Dev 데이터셋에 대해 틀리는 데이터의 특징을 분석**합니다
 - 해당 **오답을 개선할 수 있는 아이디어를 제안하고 적용**합니다
 - 위 과정을 반복했습니다
@@ -329,16 +330,17 @@ python evaluation.py
 - 가장 먼저, **baseline 모델간의 성능과 오답을 분석**한 결과
 
    - bert에 비해 bounding box의 레이아웃 정보를 추가적으로 사용하는 LayoutLM이 더 좋은 성능을 보였습니다
-   - 이는 앞서 bounding box 레이아웃 정보가 라벨별로 상이한 분포를 띄기 때문에 이 정보를 사용한 것으로 볼 수 있습니다
+   - 이는 앞서 **bounding box 레이아웃 정보**가 **라벨별로 상이한 분포**를 띄기 때문에 이 정보를 사용한 것으로 볼 수 있습니다
+   - 해당 분포에 대한 시각화 정보는 [analysis_bboxes](./data_analysis/analysis_bboxes.ipynb#label별-box의-center-위치-분포-확인)의 맨 하단에서 확인하실 수 있습니다
 
    <br/>
 
    - 하지만, `TOTAL` 라벨에 대한 점수가 낮다는 것을 발견하고 오답 분석을 했습니다
 
-      - 틀리는 `TOTAL` 라벨과 맞추는 `TOTAL`라벨간의 차이를 확인한 결과
+      - 틀리는 `TOTAL` 라벨과 맞히는 `TOTAL`라벨간의 차이를 확인한 결과
 
-        - `$`라는 화폐단위가 붙는 `TOTAL` 라벨의 경우 전부 맞추는 것을 볼 수 있었습니다
-        - `rm`이라는 화폐 단위가 붙는 `TOTAL`의 경우 맞추는 것을 어려워 하는 것을 확인했습니다
+        - `$`라는 화폐단위가 붙는 `TOTAL` 라벨의 경우 전부 맞히는 것을 볼 수 있었습니다
+        - `rm`이라는 화폐 단위가 붙는 `TOTAL`의 경우 맞히는 것을 어려워 하는 것을 확인했습니다
           - 그 이유는, 해당 샘플 안에 `rm`이라는 단어가 다수 존재하기 때문으로 보입니다
 
         - 하지만, 라벨이 `TOTAL`에 해당하는 개별 Token 단위에서 틀리는 Token과 그렇지 않은 Token간의 차이점은 발견할 수 없었습니다
@@ -367,7 +369,7 @@ python evaluation.py
       - `TOTAL` 라벨에 해당하는 Token의 경우 해당 Token의 앞에 `TOTAL이라는 Text Token`이 존재하는 경우가 많다!
          - 즉, `TOTAL : 가격` 과 같은 형태의 샘플이 정말 많기 때문에, \
          Inference 단계에서 `TOTAL`이라는 라벨을 예측할 때에는 앞에 `TOTAL이라는 Text Token이 존재하는가?`를 제약 조건으로 놓을 수 있습니다
-         - 이를 통해 만약 `TOTAL이라는 Text 앞에 오는 잘못된 라벨 예측`을 방지할 수 있습니다
+         - 이를 통해 만약 `TOTAL이라는 Text 앞에서 TOTAL로 잘못 예측`하는 것을 방지할 수 있습니다
 
       - `COMPANY`라벨에 해당하는 Token의 경우 전체 Text의 앞부분에 오는 것을 확인했습니다
          - 이를 통해, Inference 단계에서 `전체 Text의 뒷부분에서 COMPANY로 잘못 예측`하는 것을 방지할 수 있습니다
@@ -384,21 +386,19 @@ python evaluation.py
    - 현재 LayoutLMV3는 uncased 모델을 지원하지 않습니다
       - 하지만, train 데이터는 대문자로만 구성되어있고 op_test 데이터는 대소문자로 구성되어있기 때문에\
       이 둘 간의  분포를 맞춰주기 위해 trian과 dev, op_test의 텍스트를 Tokenizing 하기 전\
-      `소문자 변환` + `악센트 제거` 를 추가해줬습니다
+      `소문자 변환` + `악센트 제거`라는 전처리 과정을 추가해줬습니다
       - 이를 통해 같은 조건에서 1.3점 정도의 op_test F1-score 향상을 얻어낼 수 있었습니다
 
    - 자세한 내용은 [layoutlmv3_results](./docs/layoutlmv3_results.md)에서 확인할 수 있습니다
 
-   - 시간관계상 발견한 `TOTAL`에 대해서만 분석을 추가로 진행하고, 결과를 확인해보았습니다
-
 
 <br/>
 <br/>
 
 
-- **`total이라는 텍스트`보다 `TOTAL 라벨 Token`은 항상 뒤에 오는지**를 분석한 결과
+- **`total이라는 텍스트`는 항상 `TOTAL 라벨 Token`의 앞에 오는지**를 분석한 결과
    - 가장 먼저, `626`개의 (train + dev) 데이터 중에서, 5개의 샘플을 제외하고는 `total이라는 텍스트`가 존재함을 확인했습니다
-   - 그렇다면, `Total : [가격]` 처럼 `total이라는 텍스트`는 항상 `TOTAL 라벨 Token`뒤에 오는지를 분석해보니
+   - 그렇다면, `Total : [가격]` 처럼 `total이라는 텍스트`는 항상 `TOTAL 라벨 Token`앞 오는지를 분석해보니
       - `621`개의 샘플 중에서 
          - `524`개는 `Total : [가격]`처럼 `total이라는 텍스트`가 먼저 왔고
          - `97`개는 뒤에 오는 것을 확인했습니다
@@ -416,7 +416,9 @@ python evaluation.py
 
 ### Future work
 
-- 이번 Competition에서는 성능 향상에 기여할 수 있지만, 아래와 같이 확실한 근거에 기반하지 않는 무작위성 실험은 지양했습니다. 
+- 이번 Competition에서는 확실한 근거에 기반하지 않는 무작위성 실험은 지양하였기에 진행하지 않았지만,\
+  아래와 같은 시도는 큰 성능 향상이 기대됩니다!
+
    - Ensemble
    - Hyperparameter Tuning(seed, batch_size, learning_rate, weight_decay_rate, learning scheduler)
    - DAPT(Domain-Adaptive Pretraining) or TAPT(Task-Adaptive Pretraining)
